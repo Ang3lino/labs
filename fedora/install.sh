@@ -50,3 +50,8 @@ dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$
 dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 dnf install vlc
 dnf install python-vlc # (optional)
+
+# Xelatex
+# ---------------------------------------------------------------------------------
+sudo dnf install -y texlive-scheme-full
+# latexmk -xelatex -pvc cv.tex # run in watch mode
