@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-self-healing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ml-self-healing
+  template:
+    metadata:
+      labels:
+        app: ml-self-healing
+    spec:
+      containers:
+        - name: ml-self-healing
+          image: ml-lab-02:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5

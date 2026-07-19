@@ -1,0 +1,12 @@
+[
+  {"service":"api-gateway","depends_on":["auth-service","digital-twin-sync","dashboard-api"]},
+  {"service":"digital-twin-sync","depends_on":["mqtt-broker","timescaledb","model-inference"]},
+  {"service":"sensor-ingestion","depends_on":["mqtt-broker","timescaledb"]},
+  {"service":"dashboard-api","depends_on":["digital-twin-sync","auth-service"]},
+  {"service":"alert-engine","depends_on":["digital-twin-sync","data-pipeline"]},
+  {"service":"data-pipeline","depends_on":["timescaledb","sensor-ingestion"]},
+  {"service":"model-inference","depends_on":["timescaledb"]},
+  {"service":"auth-service","depends_on":["timescaledb"]},
+  {"service":"mqtt-broker","depends_on":[]},
+  {"service":"timescaledb","depends_on":[]}
+]

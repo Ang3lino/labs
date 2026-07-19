@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: infra-sample-data
+  namespace: infra-intelligence
+data:
+  ecs-task-events.json: |
+    [
+      {"timestamp":"2024-01-15T10:20:00Z","service":"api-gateway","task_id":"task-ag-001","event":"RUNNING","cluster":"prod-cluster","cpu":256,"memory":512,"dependencies":["auth-service","digital-twin-sync","dashboard-api"]},
+      {"timestamp":"2024-01-15T10:21:00Z","service":"auth-service","task_id":"task-au-001","event":"RUNNING","cluster":"prod-cluster","cpu":256,"memory":512},
+      {"timestamp":"2024-01-15T10:22:00Z","service":"mqtt-broker","task_id":"task-mq-001","event":"RUNNING","cluster":"prod-cluster","cpu":256,"memory":512},
+      {"timestamp":"2024-01-15T10:23:00Z","service":"timescaledb","task_id":"task-ts-001","event":"RUNNING","cluster":"prod-cluster","cpu":512,"memory":1024},
+      {"timestamp":"2024-01-15T10:23:10Z","service":"model-inference","task_id":"task-mi-001","event":"RUNNING","cluster":"prod-cluster","cpu":512,"memory":1024},
+      {"timestamp":"2024-01-15T10:23:20Z","service":"sensor-ingestion","task_id":"task-si-001","event":"RUNNING","cluster":"prod-cluster","cpu":256,"memory":512,"dependencies":["mqtt-broker","timescaledb"]},
+      {"timestamp":"2024-01-15T10:23:30Z","service":"digital-twin-sync","task_id":"task-dt-001","event":"RUNNING","cluster":"prod-cluster","cpu":256,"memory":512,"dependencies":["mqtt-broker","timescaledb","model-inference"]},
+      {"timestamp":"2024-01-15T10:24:10Z","service":"digital-twin-sync","task_id":"task-dt-001","event":"STOPPED","cluster":"prod-cluster","reason":"OutOfMemory","exit_code":137}
+    ]
+  cloudwatch-errors.json: |
+    [
+      {"timestamp":"2024-01-15T10:24:11Z","service":"digital-twin-sync","level":"ERROR","message":"Failed to sync device shadow: OutOfMemory","trace_id":"TR-001"},
+      {"timestamp":"2024-01-15T10:24:12Z","service":"dashboard-api","level":"ERROR","message":"Upstream digital-twin-sync unavailable","trace_id":"TR-001"},
+      {"timestamp":"2024-01-15T10:24:13Z","service":"api-gateway","level":"ERROR","message":"Route /twins failed due to dashboard-api timeout","trace_id":"TR-001"},
+      {"timestamp":"2024-01-15T10:24:14Z","service":"alert-engine","level":"ERROR","message":"Could not evaluate alert stream: twin sync missing","trace_id":"TR-001"},
+      {"timestamp":"2024-01-15T10:27:02Z","service":"digital-twin-sync","level":"ERROR","message":"Failed subscription setup: broker unavailable","trace_id":"TR-003"}
+    ]
+  service-dependencies.json: |
+    [
+      {"service":"api-gateway","depends_on":["auth-service","digital-twin-sync","dashboard-api"]},
+      {"service":"digital-twin-sync","depends_on":["mqtt-broker","timescaledb","model-inference"]},
+      {"service":"sensor-ingestion","depends_on":["mqtt-broker","timescaledb"]},
+      {"service":"dashboard-api","depends_on":["digital-twin-sync","auth-service"]},
+      {"service":"alert-engine","depends_on":["digital-twin-sync","data-pipeline"]},
+      {"service":"data-pipeline","depends_on":["timescaledb","sensor-ingestion"]},
+      {"service":"model-inference","depends_on":["timescaledb"]},
+      {"service":"auth-service","depends_on":["timescaledb"]},
+      {"service":"mqtt-broker","depends_on":[]},
+      {"service":"timescaledb","depends_on":[]}
+    ]

@@ -1,0 +1,19 @@
+[
+  {"id":"doc-1","title":"auth-service overview","content":"auth-service issues JWT tokens and validates sessions. It uses redis for session cache and communicates with user-service.","type":"service","tags":["auth","redis","jwt"]},
+  {"id":"doc-2","title":"user-service overview","content":"user-service stores user profiles in postgres and depends on auth-service for identity checks.","type":"service","tags":["user","postgres","auth"]},
+  {"id":"doc-3","title":"payment-service overview","content":"payment-service handles card charges, depends on auth-service and user-service, and sends events to notification-service.","type":"service","tags":["payment","auth","events"]},
+  {"id":"doc-4","title":"notification-service overview","content":"notification-service delivers email and sms notifications and depends on api-gateway for inbound API traffic.","type":"service","tags":["notification","email","sms"]},
+  {"id":"doc-5","title":"api-gateway overview","content":"api-gateway routes public requests to auth-service, user-service, payment-service, and notification-service.","type":"service","tags":["gateway","routing","edge"]},
+  {"id":"doc-6","title":"session-service note","content":"session-service renews login sessions and uses redis plus auth-service token validation.","type":"service","tags":["session","auth","redis"]},
+  {"id":"doc-7","title":"incident 2024-03 auth outage","content":"auth-service outage caused payment failures and login errors for api-gateway. Root cause was redis saturation.","type":"incident","tags":["incident","auth","payment","redis"]},
+  {"id":"doc-8","title":"incident 2024-04 payment timeout","content":"payment-service timed out when user-service latency increased. notification-service backlog increased after retries.","type":"incident","tags":["incident","payment","user","notification"]},
+  {"id":"doc-9","title":"incident 2024-05 gateway spikes","content":"api-gateway saw 5xx spikes when auth-service returned token validation errors.","type":"incident","tags":["incident","gateway","auth"]},
+  {"id":"doc-10","title":"runbook redis outage","content":"if redis is down, auth-service and session-service are affected. Degrade to stateless auth mode and scale api-gateway read timeout.","type":"runbook","tags":["runbook","redis","auth","session"]},
+  {"id":"doc-11","title":"runbook payment failures","content":"if payment-service fails, inspect auth-service token checks and user-service latency before restarting workers.","type":"runbook","tags":["runbook","payment","auth","user"]},
+  {"id":"doc-12","title":"runbook notification lag","content":"if notification-service lag grows, check payment-service retry rate and queue depth.","type":"runbook","tags":["runbook","notification","payment","queue"]},
+  {"id":"doc-13","title":"component redis cache","content":"redis cache is used by auth-service and session-service for token/session lookup.","type":"service","tags":["component","redis","cache"]},
+  {"id":"doc-14","title":"component postgres","content":"postgres primary database is used by user-service and payment-service for durable records.","type":"service","tags":["component","postgres","database"]},
+  {"id":"doc-15","title":"dependency map note","content":"payment-service communicates with notification-service and depends on auth-service for user authorization.","type":"runbook","tags":["dependency","payment","notification","auth"]},
+  {"id":"doc-16","title":"incident 2024-06 redis packet loss","content":"redis packet loss increased auth-service latency and caused api-gateway retries.","type":"incident","tags":["incident","redis","auth","gateway"]},
+  {"id":"doc-17","title":"runbook blast radius","content":"for blast radius analysis start from failed component, traverse depends_on edges, then list incidents touching those services.","type":"runbook","tags":["runbook","blast-radius","graph"]}
+]

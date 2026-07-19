@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pipeline-config
+data:
+  model_name: simple-sentiment-v1
+  log_level: INFO
+  feature_size: "6"
+  pipeline_mode: demo
