@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fraud-model
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fraud-model
+  template:
+    metadata:
+      labels:
+        app: fraud-model
+    spec:
+      containers:
+        - name: fraud-model
+          image: <ECR_REPOSITORY_URI>:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5

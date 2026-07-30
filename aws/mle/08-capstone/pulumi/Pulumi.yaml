@@ -1,0 +1,6 @@
+name: mle-lab-08-capstone
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: Lab 08 Capstone IaC for end-to-end fraud detection ML platform

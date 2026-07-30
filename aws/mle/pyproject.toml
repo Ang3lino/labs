@@ -1,0 +1,33 @@
+[project]
+name = "aws-mle-labs"
+version = "0.1.0"
+description = "AWS MLE Associate (MLA-C01) study labs"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "boto3",
+  "sagemaker",
+  "torch",
+  "scikit-learn",
+  "pandas",
+  "numpy",
+  "matplotlib",
+]
+
+[project.optional-dependencies]
+iac = [
+  "aws-cdk-lib",
+  "constructs",
+  "pulumi",
+  "pulumi-aws",
+  "pulumi-eks",
+]
+dev = [
+  "pytest",
+  "ipython",
+  "jupyter",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"

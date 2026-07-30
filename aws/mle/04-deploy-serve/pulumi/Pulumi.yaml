@@ -1,0 +1,6 @@
+name: mle-lab-04-deploy-serve
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: Pulumi stack for Lab 04 deploy and serve infrastructure
