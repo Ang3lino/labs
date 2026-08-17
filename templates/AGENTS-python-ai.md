@@ -43,22 +43,59 @@ uv run basedpyright .      # Type check
 | Tracking | MLflow |
 | Local inference | Ollama |
 
+## Architecture
+
+**Functional core, imperative shell** — pure functions do logic, thin outer layer does I/O.
+
+| Principle | Name | Means |
+|---|---|---|
+| One file = one job | Single Responsibility (SRP) | Split when a file does two things |
+| `clients/` wrapping services | Ports & Adapters (Hexagonal) | Swap Ollama for OpenAI by changing one file |
+| Thin CLI wiring everything | Composition root | `main.py` only connects pieces, no logic |
+| `steps/` as pure functions | Pipeline pattern | Each step: data in → data out |
+| Config as typed object | Parse, don't validate | Invalid state is unrepresentable |
+| Pipeline-per-directory | Vertical slices | Each pipeline is self-contained |
+
 ## Project Layout
 
-src-layout by default. Flat only for true single-file `# /// script` tools.
+src-layout by default. Flat only for true single-file `# /// script` tools (PEP 723).
+
+### Standard (single pipeline)
 
 ```
 project-name/
 ├── pyproject.toml
+├── justfile                 # Task runner (all commands in one place)
+├── AGENTS.md                # Project-specific (copy from this template)
 ├── src/project_name/
 │   ├── __init__.py
-│   ├── main.py         # CLI entrypoint
-│   ├── config.py       # Pydantic config
-│   └── ...
+│   ├── main.py              # CLI (typer). Thin — just calls pipeline.
+│   ├── config.py            # Pydantic config + env loading
+│   ├── pipeline.py          # Orchestration (calls steps in order)
+│   ├── steps/               # Pure functions, one per step
+│   │   ├── ingest.py
+│   │   ├── process.py
+│   │   └── output.py
+│   └── clients/             # External service wrappers (swap without touching logic)
+│       ├── llm.py           # Ollama/OpenAI
+│       └── tracking.py      # MLflow
 ├── tests/
-│   ├── test_*.py       # pytest unit tests
-│   └── smoke.py        # Integration tests (if needed, requires real services)
+│   ├── test_*.py            # pytest unit tests
+│   └── smoke.py             # Integration (needs real services)
 └── README.md
+```
+
+### Multi-pipeline (like translator)
+
+```
+project-name/
+├── pipeline-a/              # Self-contained vertical slice
+├── pipeline-b/              # Self-contained vertical slice
+├── shared/                  # Shared utils (or _shared.py)
+├── infra/                   # Terraform/IaC (separate from app)
+├── tests/
+├── cli.py                   # Dispatcher
+└── justfile
 ```
 
 ## pyproject.toml Template
