@@ -23,29 +23,28 @@ scp <file> user@host:<dest>                     # Windows: Git Bash or enable Op
 
 Windows OpenSSH: `Settings > Apps > Optional Features > OpenSSH Client`
 
-## GitHub Copilot credentials
+## GitHub CLI / Copilot auth
 
-| OS | Path |
-|----|------|
-| macOS / Linux | `~/.config/github-copilot/auth.db` |
-| Windows | `%LOCALAPPDATA%\github-copilot\auth.db` |
+Token is stored in the **system keyring** (not in `auth.db` — that file is empty).
 
 ```bash
-# Share on LAN (run on source, kill after transfer)
-cd ~/.config/github-copilot && python3 -m http.server 8888 --bind 0.0.0.0
+# Show token on source machine
+gh auth token
 
-# Receive
-mkdir -p ~/.config/github-copilot
-curl http://<ip>:8888/auth.db -o ~/.config/github-copilot/auth.db
+# Transfer to another machine via pipe
+gh auth token > /tmp/gh-token.txt
+scp /tmp/gh-token.txt user@host:/tmp/
+rm /tmp/gh-token.txt
+
+# On target: login with token
+cat /tmp/gh-token.txt | gh auth login --with-token
+rm /tmp/gh-token.txt
+
+# Or just authenticate directly on the target (easiest)
+gh auth login
 ```
 
-```powershell
-# Receive (Windows PowerShell)
-New-Item -ItemType Directory -Force "$env:LOCALAPPDATA\github-copilot"
-curl.exe http://<ip>:8888/auth.db -o "$env:LOCALAPPDATA\github-copilot\auth.db"
-```
-
-Prefer `scp` over HTTP — no open port window.
+If `gh` not installed: `sudo apt install -y gh`
 
 ## Troubleshooting
 
