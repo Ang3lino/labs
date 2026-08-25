@@ -12,6 +12,26 @@ stow -D <pkg>                                            # unlink package
 # No output = success. Restart the app after (e.g. tmux kill-server; tmux)
 ```
 
+## Changing default shell
+
+```bash
+chsh -s $(which zsh)              # change login shell
+grep $USER /etc/passwd            # verify it took effect
+# Full desktop logout/login required — terminal emulators read
+# the login shell from /etc/passwd at KDE/GNOME session start,
+# not when you open a new terminal window.
+
+# If chsh silently fails:
+sudo chsh -s /usr/bin/zsh $USER   # force with sudo
+
+# tmux: set default shell explicitly in .tmux.conf
+# set -g default-shell /bin/zsh
+
+# Alacritty: ~/.config/alacritty/alacritty.toml
+# [shell]
+# program = "/usr/bin/zsh"
+```
+
 ## sh vs bash — know what works where
 
 | Feature | sh (POSIX) | bash |
