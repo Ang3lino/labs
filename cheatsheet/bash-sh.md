@@ -3,6 +3,15 @@
 > POSIX sh for inside pods (alpine/busybox), bash for the exam terminal.
 > ponytail: shortest correct form first.
 
+## Stow quick reference
+
+```bash
+cd ~/dotfiles && stow --target="$HOME" --restow <pkg>   # sync one package
+cd ~/dotfiles && stow --target="$HOME" --adopt --restow <pkg>  # force adopt existing files
+stow -D <pkg>                                            # unlink package
+# No output = success. Restart the app after (e.g. tmux kill-server; tmux)
+```
+
 ## sh vs bash — know what works where
 
 | Feature | sh (POSIX) | bash |
