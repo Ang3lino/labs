@@ -46,3 +46,29 @@ curl.exe http://<ip>:8888/auth.db -o "$env:LOCALAPPDATA\github-copilot\auth.db"
 ```
 
 Prefer `scp` over HTTP — no open port window.
+
+## Troubleshooting
+
+**HTTP server: curl hangs on receiver**
+- macOS firewall blocks incoming. Either disable firewall temporarily or use SCP instead.
+
+**SCP: connection refused**
+- SSH server not installed on receiver. Fix: `sudo apt install -y openssh-server`
+
+## OpenCode credentials
+
+OpenCode uses its own API key, separate from GitHub Copilot's `auth.db`.
+
+```bash
+# On the target machine, add to ~/.secrets (sourced by .zshrc automatically)
+echo 'export OPENCODE_API_KEY=your-key-here' >> ~/.secrets
+```
+
+To use a specific provider config:
+
+```bash
+# Pick one of the single-provider configs
+cp ~/.config/opencode/oh-my-openagent.github-copilot.json ~/.config/opencode/oh-my-openagent.json
+cp ~/.config/opencode/oh-my-openagent.bedrock.json ~/.config/opencode/oh-my-openagent.json
+cp ~/.config/opencode/oh-my-openagent.opencode-go.json ~/.config/opencode/oh-my-openagent.json
+```
