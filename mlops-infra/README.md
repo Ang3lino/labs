@@ -16,14 +16,16 @@ By the end of these 6 labs, you'll have deployed an LLM on Kubernetes with GPU s
 | vLLM + KServe | LLM inference serving. The hottest skill in ML infra (2025-2026). | 04 |
 | RAG (Vector DB + Embeddings) | Every enterprise AI app needs retrieval-augmented generation. | 05 |
 | Prometheus + Grafana | Production observability. SRE/platform roles require this. | 06 |
+| Argo CD | GitOps CD for K8s. Declarative deployments, drift detection, fleet management. | 07 |
+| KubeRay | Distributed Ray clusters on K8s. Multi-node LLM inference, autoscaling. | 08 |
 
 ## Learning Path (Incremental)
 
 ```
-Lab 01         Lab 02          Lab 03          Lab 04          Lab 05       Lab 06
-Docker    ───> Kubernetes ───> GPU on K8s ───> vLLM+KServe ───> RAG    ───> Monitoring
-containers     pods/svc/       nvidia-gpu      model serving    vector DB   dashboards
-               deploy          operator        autoscaling      embeddings  alerts/SLOs
+Lab 01         Lab 02          Lab 03          Lab 04          Lab 05       Lab 06         Lab 07       Lab 08
+Docker    ───> Kubernetes ───> GPU on K8s ───> vLLM+KServe ───> RAG    ───> Monitoring ───> Argo CD ───> KubeRay
+containers     pods/svc/       nvidia-gpu      model serving    vector DB   dashboards     GitOps CD    distributed
+               deploy          operator        autoscaling      embeddings  alerts/SLOs    sync waves   inference
 ```
 
 Each lab builds on the previous. Don't skip ahead.
@@ -58,7 +60,9 @@ Each lab includes:
 | 04 | vLLM + KServe | 4-6 hours |
 | 05 | RAG Pipeline | 4-6 hours |
 | 06 | Observability | 3-4 hours |
-| **Total** | | **~25-30 hours** |
+| 07 | Argo CD GitOps | 4-6 hours |
+| 08 | KubeRay Distributed Inference | 4-6 hours |
+| **Total** | | **~33-42 hours** |
 
 ## Industry Context
 
@@ -66,10 +70,10 @@ This stack maps directly to real ML platform roles:
 
 | Role | Uses Labs |
 |---|---|
-| MLOps Engineer | All 6 |
-| ML Platform Engineer | 02, 03, 04, 06 |
-| AI Engineer | 04, 05 |
-| SRE / Platform | 02, 03, 06 |
+| MLOps Engineer | All 8 |
+| ML Platform Engineer | 02, 03, 04, 06, 07, 08 |
+| AI Engineer | 04, 05, 08 |
+| SRE / Platform | 02, 03, 06, 07 |
 
 ## Quick Start
 
