@@ -1,0 +1,6 @@
+# Shell scripts and k8s manifests must keep LF endings: CRLF makes a .sh fail
+# on Linux with "illegal option" / ": not found", which is a confusing way to
+# discover your editor is on Windows.
+*.sh text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf

@@ -71,8 +71,8 @@ lab-XX-name/
 | 07 | Graph RAG on K8s | StatefulSet, Namespaces, Secrets | "I deploy complex AI systems on K8s" |
 | 08 | Infra Intelligence | Jobs, real-world data, Graph queries | "I build AI that monitors infrastructure" |
 | 09 | Local → AWS | EKS, ECR, IAM, Terraform | "I migrate from local K8s to production cloud" |
-| 10 | [GPU Reservation with Volcano](lab-10-volcano-gpu-reservation/) | Volcano Queues, PodGroups, gang scheduling, extended resources | "I built time-bounded GPU reservations on a scheduler with no reservation primitive" |
-| 11 | [LLM Serving Runtime](lab-11-vllm-serving-runtime/) | vLLM, OpenAI API surface, Prometheus metrics, tensor parallelism | "I chose an inference runtime on evidence, not on what everyone assumed" |
+| 10 | [GPU Reservation with Volcano](10-volcano-gpu-reservation/) | Volcano Queues, PodGroups, gang scheduling, extended resources | "I built time-bounded GPU reservations on a scheduler with no reservation primitive" |
+| 11 | [LLM Serving Runtime](11-vllm-serving-runtime/) | vLLM, OpenAI API surface, Prometheus metrics, tensor parallelism | "I chose an inference runtime on evidence, not on what everyone assumed" |
 
 ### Platform Track (10-11)
 

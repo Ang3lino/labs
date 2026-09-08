@@ -2,7 +2,7 @@
 # Remove everything this lab created. Volcano itself is left installed.
 set -uo pipefail
 
-kubectl delete -f "$(dirname "$0")/../manifests/" --ignore-not-found=true
+kubectl delete -f "$(dirname "$0")/../k8s/" --ignore-not-found=true
 kubectl delete job expiry-manual expiry-test --ignore-not-found=true
 kubectl delete queue shared reserved-team-a --ignore-not-found=true
 

@@ -72,7 +72,7 @@ Two resources, deliberately:
 ## Step 3 — Create the queues
 
 ```bash
-kubectl apply -f manifests/01-queues.yaml
+kubectl apply -f k8s/01-queues.yaml
 kubectl get queues
 ```
 
@@ -90,7 +90,7 @@ Two queues:
 The critical test. Fill the shared queue, then check the reservation is still honoured.
 
 ```bash
-kubectl apply -f manifests/02-shared-greedy.yaml
+kubectl apply -f k8s/02-shared-greedy.yaml
 kubectl get pods -l queue=shared -w    # Ctrl-C when stable
 ```
 
@@ -104,7 +104,7 @@ kubectl get podgroups
 Now claim the reservation:
 
 ```bash
-kubectl apply -f manifests/03-reserved-job.yaml
+kubectl apply -f k8s/03-reserved-job.yaml
 kubectl get pods -l queue=reserved-team-a
 ```
 
@@ -141,7 +141,7 @@ shared-greedy-2    1/1     Running   0          53s   shared
 Try the naive version to feel the difference:
 
 ```bash
-kubectl apply -f manifests/06-naive-priority.yaml
+kubectl apply -f k8s/06-naive-priority.yaml
 kubectl get pods -l approach=naive
 kubectl describe pod naive-priority-0 | grep -A3 Events
 ```
@@ -162,7 +162,7 @@ kubectl delete podgroup reserved-claim
 > Skip that and the gang sits `Pending` forever with `phase: Inqueue`. Which is itself the lesson: **a reservation is a fixed-size box, and gang scheduling will not start a job that does not fit in what is left.**
 
 ```bash
-kubectl apply -f manifests/04-gang-job.yaml
+kubectl apply -f k8s/04-gang-job.yaml
 sleep 15
 kubectl get podgroup reserved-gang -o jsonpath='{.status.phase}{"\n"}'   # Running
 kubectl get pods -l job=reserved-gang
@@ -175,7 +175,7 @@ Now force the failure — ask for 3 inside a 2-GPU reservation:
 ```bash
 kubectl delete pod -l job=reserved-gang --wait=true
 kubectl delete podgroup reserved-gang
-kubectl apply -f manifests/05-gang-toobig.yaml
+kubectl apply -f k8s/05-gang-toobig.yaml
 sleep 20
 kubectl get podgroup reserved-gang-toobig -o jsonpath='{.status.phase}{"\n"}'   # Inqueue
 kubectl get pods -l job=reserved-gang-toobig                                     # all Pending
@@ -210,7 +210,7 @@ kubectl get pods -l queue=reserved-team-a     # still Running
 Volcano has **no TTL on a queue**. Nothing expires on its own. Leaving capacity to lapse means it never comes back, which strands GPUs on a fleet that has three of them.
 
 ```bash
-kubectl apply -f manifests/07-expiry-cronjob.yaml
+kubectl apply -f k8s/07-expiry-cronjob.yaml
 kubectl get cronjob reservation-expiry
 ```
 

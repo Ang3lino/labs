@@ -95,7 +95,7 @@ This is a limitation of the CPU *build*, not of vLLM. GPU images are unaffected.
 ### Deploy
 
 ```bash
-kubectl apply -f manifests/01-vllm-cpu.yaml
+kubectl apply -f k8s/01-vllm-cpu.yaml
 kubectl rollout status deploy/vllm-cpu --timeout=900s   # image is ~1.3 GB, model load is slow
 kubectl port-forward svc/vllm 8000:8000
 ```
@@ -141,7 +141,7 @@ The three that matter:
 Scrape them properly:
 
 ```bash
-kubectl apply -f manifests/02-servicemonitor.yaml   # needs Prometheus Operator
+kubectl apply -f k8s/02-servicemonitor.yaml   # needs Prometheus Operator
 ```
 
 **Why this beats CPU utilization for autoscaling:** a GPU pinned at 100% util might be serving 2 requests or 200. Queue depth tells you whether *waiting* is happening. That distinction is the whole reason C5 is on the criteria list.
@@ -160,8 +160,8 @@ curl -s localhost:8000/metrics | grep -E 'vllm:num_requests_(running|waiting)'
 Skip if you have no GPU. Nothing above depends on it.
 
 ```bash
-kubectl apply -f manifests/03-vllm-gpu.yaml     # TP=1, one replica per GPU
-kubectl apply -f manifests/04-vllm-gpu-tp2.yaml # TP=2 across two GPUs
+kubectl apply -f k8s/03-vllm-gpu.yaml     # TP=1, one replica per GPU
+kubectl apply -f k8s/04-vllm-gpu-tp2.yaml # TP=2 across two GPUs
 ./scripts/benchmark.sh
 ```
 
