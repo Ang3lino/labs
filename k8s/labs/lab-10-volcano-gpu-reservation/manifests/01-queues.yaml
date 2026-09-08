@@ -1,0 +1,35 @@
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: Queue
+metadata:
+  name: shared
+spec:
+  reclaimable: true
+  weight: 1
+  # Guaranteed floor. The proportion plugin will not lend this away.
+  deserved:
+    apex.io/gpu: 1
+  # Ceiling. Burst up to here only while nothing else needs the capacity.
+  capability:
+    apex.io/gpu: 3
+---
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: Queue
+metadata:
+  name: reserved-team-a
+  annotations:
+    # Consumed by the expiry CronJob (manifests/07). Volcano itself ignores this -
+    # there is no TTL on a Queue, which is exactly why the CronJob exists.
+    apex.io/expires-at: "2030-01-01T00:00:00Z"
+    apex.io/requested-by: "team-a"
+    apex.io/reservation-id: "RES-0001"
+spec:
+  # Not reclaimable: this is the difference between a reservation and a loan.
+  reclaimable: false
+  weight: 1
+  # deserved == capability means "exactly this, no burst, no lending".
+  # Note the resource: gpu-p2p, not gpu. Topology is in the resource name because
+  # Volcano queue accounting is scalar and cannot express "two cards that can talk".
+  deserved:
+    apex.io/gpu-p2p: 2
+  capability:
+    apex.io/gpu-p2p: 2

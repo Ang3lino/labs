@@ -1,0 +1,51 @@
+# TP=2: ONE replica split across TWO GPUs.
+# Use this ONLY when the model does not fit on one card. Every layer ends in an
+# all-reduce across the pair; on PCIe Gen4 (64 GB/s) instead of NVLink (~900 GB/s)
+# that collective dominates. Expect WORSE single-request latency than TP=1.
+#
+# Verify peer-to-peer first:  nvidia-smi topo -m   (want PIX/PXB, not SYS)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-gpu-tp2
+  labels: { app: vllm-gpu, tp: "2" }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: vllm-gpu, tp: "2" }
+  template:
+    metadata:
+      labels: { app: vllm-gpu, tp: "2" }
+    spec:
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:v0.9.1
+          args:
+            - "--model=facebook/opt-1.3b"
+            - "--tensor-parallel-size=2"
+            - "--gpu-memory-utilization=0.90"
+            - "--max-model-len=2048"
+          ports: [{ name: http, containerPort: 8000 }]
+          env:
+            # Surfaces NCCL transport selection in the logs - this is how you
+            # find out you are silently falling back through host memory.
+            - { name: NCCL_DEBUG, value: INFO }
+          resources:
+            limits: { nvidia.com/gpu: 2 }
+          startupProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 10
+            failureThreshold: 60
+          volumeMounts:
+            - { name: shm, mountPath: /dev/shm }
+      volumes:
+        - name: shm
+          emptyDir: { medium: Memory, sizeLimit: 4Gi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-gpu-tp2
+spec:
+  selector: { app: vllm-gpu, tp: "2" }
+  ports: [{ name: http, port: 8000, targetPort: http }]

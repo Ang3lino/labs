@@ -1,0 +1,37 @@
+# The WRONG way, kept as a teaching contrast.
+# A PriorityClass makes this Pod schedule sooner. It never withholds anything.
+# Under sustained load it competes for capacity every single time - which is
+# what "the reservation was only a priority boost" looks like in production.
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+value: 1000000
+globalDefault: false
+metadata:
+  name: fake-reservation
+description: "Priority is not reservation. This class holds nothing."
+---
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: PodGroup
+metadata:
+  name: naive-priority
+spec:
+  minMember: 1
+  queue: shared
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: naive-priority-0
+  labels: { queue: shared, approach: naive }
+  annotations:
+    scheduling.k8s.io/group-name: naive-priority
+spec:
+  schedulerName: volcano
+  priorityClassName: fake-reservation
+  restartPolicy: Never
+  containers:
+    - name: work
+      image: busybox:1.36
+      command: ["sh", "-c", "echo high priority, zero reserved; sleep 3600"]
+      resources:
+        limits: { apex.io/gpu: 1 }

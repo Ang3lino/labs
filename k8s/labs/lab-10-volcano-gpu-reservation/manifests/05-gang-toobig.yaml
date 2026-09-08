@@ -1,0 +1,62 @@
+# The failure case, on purpose: 3 ranks inside a 2-GPU reservation.
+# Expect ZERO Pods running - not two. Without gang scheduling you would get two
+# Pods squatting on GPUs forever, waiting for a third that can never schedule.
+# That is the resource deadlock Volcano exists to prevent.
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: PodGroup
+metadata:
+  name: reserved-gang-toobig
+spec:
+  minMember: 3
+  queue: reserved-team-a
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: toobig-0
+  labels: { queue: reserved-team-a, job: reserved-gang-toobig }
+  annotations:
+    scheduling.k8s.io/group-name: reserved-gang-toobig
+spec:
+  schedulerName: volcano
+  restartPolicy: Never
+  containers:
+    - name: rank0
+      image: busybox:1.36
+      command: ["sh", "-c", "sleep 3600"]
+      resources:
+        limits: { apex.io/gpu-p2p: 1 }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: toobig-1
+  labels: { queue: reserved-team-a, job: reserved-gang-toobig }
+  annotations:
+    scheduling.k8s.io/group-name: reserved-gang-toobig
+spec:
+  schedulerName: volcano
+  restartPolicy: Never
+  containers:
+    - name: rank1
+      image: busybox:1.36
+      command: ["sh", "-c", "sleep 3600"]
+      resources:
+        limits: { apex.io/gpu-p2p: 1 }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: toobig-2
+  labels: { queue: reserved-team-a, job: reserved-gang-toobig }
+  annotations:
+    scheduling.k8s.io/group-name: reserved-gang-toobig
+spec:
+  schedulerName: volcano
+  restartPolicy: Never
+  containers:
+    - name: rank2
+      image: busybox:1.36
+      command: ["sh", "-c", "sleep 3600"]
+      resources:
+        limits: { apex.io/gpu-p2p: 1 }

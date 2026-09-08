@@ -1,0 +1,28 @@
+# The reservation being claimed, while the shared queue is already full.
+# Requests apex.io/gpu-p2p - a separately accounted resource the greedy job
+# never touched. This is why the capacity is genuinely withheld rather than
+# merely deprioritised.
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: PodGroup
+metadata:
+  name: reserved-claim
+spec:
+  minMember: 1
+  queue: reserved-team-a
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: reserved-claim-0
+  labels: { queue: reserved-team-a, job: reserved-claim }
+  annotations:
+    scheduling.k8s.io/group-name: reserved-claim
+spec:
+  schedulerName: volcano
+  restartPolicy: Never
+  containers:
+    - name: work
+      image: busybox:1.36
+      command: ["sh", "-c", "echo running on reserved capacity; sleep 3600"]
+      resources:
+        limits: { apex.io/gpu-p2p: 1 }

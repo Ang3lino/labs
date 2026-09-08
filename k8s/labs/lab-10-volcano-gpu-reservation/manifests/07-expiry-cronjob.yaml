@@ -1,0 +1,85 @@
+# Release is an ACTION, not a decay.
+#
+# Volcano has no TTL on a Queue. Nothing expires by itself. A reservation that
+# "ends on Thursday" needs something that actually ends it on Thursday, or the
+# capacity is stranded forever - which matters a lot on a fleet with 3 GPUs.
+#
+# ponytail: a CronJob running kubectl is the laziest thing that works. It is
+# poll-based (1 min granularity) and has no leader election. Upgrade path: a real
+# controller with a watch + workqueue, if reservations ever need second-level
+# precision or the queue count outgrows a single-shot list.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: reservation-expiry
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: reservation-expiry
+rules:
+  - apiGroups: ["scheduling.volcano.sh"]
+    resources: ["queues"]
+    verbs: ["get", "list", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: reservation-expiry
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: reservation-expiry
+subjects:
+  - kind: ServiceAccount
+    name: reservation-expiry
+    namespace: default
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reservation-expiry
+spec:
+  schedule: "*/1 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: reservation-expiry
+          restartPolicy: OnFailure
+          containers:
+            - name: expiry
+              image: alpine/k8s:1.31.0
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  # ISO-8601 Zulu timestamps compare correctly as plain strings,
+                  # so no date(1) parsing is needed - which keeps this working on
+                  # busybox, alpine and distroless kubectl images alike.
+                  now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+                  echo "expiry sweep at $now"
+
+                  # go-template instead of jq: no second tool to parse output that
+                  # kubectl can already format itself.
+                  kubectl get queues -o go-template='{{range .items}}{{if .metadata.annotations}}{{$e := index .metadata.annotations "apex.io/expires-at"}}{{if $e}}{{.metadata.name}}{{" "}}{{$e}}{{"\n"}}{{end}}{{end}}{{end}}' \
+                    | while read -r queue expires; do
+                        [ -z "$queue" ] && continue
+                        if awk -v a="$now" -v b="$expires" 'BEGIN{exit !(a>=b)}'; then
+                          echo "  $queue: EXPIRED at $expires - releasing capacity"
+                          # JSON patch, NOT merge patch. A merge patch with {} is a
+                          # no-op on an existing map: it reports "patched (no change)"
+                          # and silently releases nothing. Found the hard way.
+                          kubectl patch queue "$queue" --type=json \
+                            -p '[{"op":"replace","path":"/spec/deserved","value":{}},{"op":"replace","path":"/spec/capability","value":{}}]'
+                          kubectl annotate queue "$queue" \
+                            apex.io/released-at="$now" --overwrite
+                        else
+                          echo "  $queue: active until $expires"
+                        fi
+                      done
+                  echo "sweep complete"

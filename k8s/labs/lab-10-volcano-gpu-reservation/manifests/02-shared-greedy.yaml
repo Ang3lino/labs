@@ -1,0 +1,61 @@
+# Greedy tenant: asks for every generic GPU on the node.
+# Purpose: fill the shared queue, then check in step 4 that the reservation
+# is STILL satisfiable. If it isn't, nothing was ever reserved.
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: PodGroup
+metadata:
+  name: shared-greedy
+spec:
+  minMember: 3
+  queue: shared
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shared-greedy-0
+  labels: { queue: shared, job: shared-greedy }
+  annotations:
+    scheduling.k8s.io/group-name: shared-greedy
+spec:
+  schedulerName: volcano
+  restartPolicy: Never
+  containers:
+    - name: work
+      image: busybox:1.36
+      command: ["sh", "-c", "echo holding a gpu; sleep 3600"]
+      resources:
+        limits: { apex.io/gpu: 1 }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shared-greedy-1
+  labels: { queue: shared, job: shared-greedy }
+  annotations:
+    scheduling.k8s.io/group-name: shared-greedy
+spec:
+  schedulerName: volcano
+  restartPolicy: Never
+  containers:
+    - name: work
+      image: busybox:1.36
+      command: ["sh", "-c", "echo holding a gpu; sleep 3600"]
+      resources:
+        limits: { apex.io/gpu: 1 }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shared-greedy-2
+  labels: { queue: shared, job: shared-greedy }
+  annotations:
+    scheduling.k8s.io/group-name: shared-greedy
+spec:
+  schedulerName: volcano
+  restartPolicy: Never
+  containers:
+    - name: work
+      image: busybox:1.36
+      command: ["sh", "-c", "echo holding a gpu; sleep 3600"]
+      resources:
+        limits: { apex.io/gpu: 1 }

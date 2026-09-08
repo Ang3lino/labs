@@ -71,6 +71,21 @@ lab-XX-name/
 | 07 | Graph RAG on K8s | StatefulSet, Namespaces, Secrets | "I deploy complex AI systems on K8s" |
 | 08 | Infra Intelligence | Jobs, real-world data, Graph queries | "I build AI that monitors infrastructure" |
 | 09 | Local → AWS | EKS, ECR, IAM, Terraform | "I migrate from local K8s to production cloud" |
+| 10 | [GPU Reservation with Volcano](lab-10-volcano-gpu-reservation/) | Volcano Queues, PodGroups, gang scheduling, extended resources | "I built time-bounded GPU reservations on a scheduler with no reservation primitive" |
+| 11 | [LLM Serving Runtime](lab-11-vllm-serving-runtime/) | vLLM, OpenAI API surface, Prometheus metrics, tensor parallelism | "I chose an inference runtime on evidence, not on what everyone assumed" |
+
+### Platform Track (10-11)
+
+Labs 10 and 11 are a pair - the two decisions a shared GPU platform must make before
+anything else gets built, and both are usually made by accident:
+
+- **10** - how capacity is *reserved*, when Kubernetes and Volcano both lack a reservation
+  primitive. Runs with **no GPU** by advertising fake GPUs as extended resources.
+- **11** - which *runtime* serves the models, when everyone has already assumed vLLM
+  without writing down why.
+
+Shared theme: the default answer is usually *undecided* rather than wrong, and the job is
+to turn an assumption into a decision with a reversal condition attached.
 
 ## How to Use These Labs
 

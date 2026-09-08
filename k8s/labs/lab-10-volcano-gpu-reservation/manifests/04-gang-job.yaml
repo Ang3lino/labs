@@ -1,0 +1,43 @@
+# Gang scheduling INSIDE the reservation: minMember 2 against a 2-GPU reservation.
+# All Pods run, or none do. Proves the reservation did not break gang semantics.
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: PodGroup
+metadata:
+  name: reserved-gang
+spec:
+  minMember: 2
+  queue: reserved-team-a
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: reserved-gang-0
+  labels: { queue: reserved-team-a, job: reserved-gang }
+  annotations:
+    scheduling.k8s.io/group-name: reserved-gang
+spec:
+  schedulerName: volcano
+  restartPolicy: Never
+  containers:
+    - name: rank0
+      image: busybox:1.36
+      command: ["sh", "-c", "echo rank 0 up; sleep 3600"]
+      resources:
+        limits: { apex.io/gpu-p2p: 1 }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: reserved-gang-1
+  labels: { queue: reserved-team-a, job: reserved-gang }
+  annotations:
+    scheduling.k8s.io/group-name: reserved-gang
+spec:
+  schedulerName: volcano
+  restartPolicy: Never
+  containers:
+    - name: rank1
+      image: busybox:1.36
+      command: ["sh", "-c", "echo rank 1 up; sleep 3600"]
+      resources:
+        limits: { apex.io/gpu-p2p: 1 }

@@ -1,0 +1,64 @@
+# vLLM on CPU with a tiny model. Slow inference, identical API surface.
+# The point is to verify criteria C3 (streaming), C4 (OpenAI surface) and
+# C5 (Prometheus metric names) without booking GPU time.
+#
+# ponytail: facebook/opt-125m because it is small enough to load on a laptop.
+# Upgrade path: any model you actually intend to serve, once you have the GPU.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-cpu
+  labels: { app: vllm }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: vllm }
+  template:
+    metadata:
+      labels: { app: vllm }
+    spec:
+      containers:
+        - name: vllm
+          image: public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:v0.9.1
+          args:
+            - "--model=facebook/opt-125m"
+            - "--dtype=bfloat16"
+            - "--max-model-len=512"
+            - "--host=0.0.0.0"
+            - "--port=8000"
+          ports:
+            - { name: http, containerPort: 8000 }
+          env:
+            - { name: VLLM_CPU_KVCACHE_SPACE, value: "2" }
+            - { name: HF_HOME, value: /tmp/hf }
+          resources:
+            requests: { cpu: "2", memory: 6Gi }
+            limits:   { cpu: "4", memory: 10Gi }
+          # Model load is slow on CPU. startupProbe buys it time WITHOUT making
+          # liveness sloppy once it is up - the standard pattern for slow starts.
+          startupProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 10
+            failureThreshold: 90     # up to 15 min
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 20
+            failureThreshold: 3
+          volumeMounts:
+            - { name: cache, mountPath: /tmp/hf }
+      volumes:
+        - name: cache
+          emptyDir: { sizeLimit: 5Gi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm
+  labels: { app: vllm }
+spec:
+  selector: { app: vllm }
+  ports:
+    - { name: http, port: 8000, targetPort: http }

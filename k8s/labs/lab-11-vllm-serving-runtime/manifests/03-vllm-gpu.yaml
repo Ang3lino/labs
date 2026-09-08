@@ -1,0 +1,48 @@
+# GPU baseline: TP=1, ONE REPLICA PER GPU.
+# On PCIe-only cards (L40S has no NVLink) this beats TP=2 on aggregate
+# throughput and gives better fault isolation. Start here, always.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-gpu-tp1
+  labels: { app: vllm-gpu, tp: "1" }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: vllm-gpu, tp: "1" }
+  template:
+    metadata:
+      labels: { app: vllm-gpu, tp: "1" }
+    spec:
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:v0.9.1
+          args:
+            - "--model=facebook/opt-1.3b"
+            - "--tensor-parallel-size=1"
+            - "--gpu-memory-utilization=0.90"
+            - "--max-model-len=2048"
+          ports: [{ name: http, containerPort: 8000 }]
+          resources:
+            limits: { nvidia.com/gpu: 1 }
+          startupProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 10
+          volumeMounts:
+            - { name: shm, mountPath: /dev/shm }
+      volumes:
+        # NCCL needs shared memory. The default 64Mi is a classic silent hang.
+        - name: shm
+          emptyDir: { medium: Memory, sizeLimit: 2Gi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-gpu-tp1
+spec:
+  selector: { app: vllm-gpu, tp: "1" }
+  ports: [{ name: http, port: 8000, targetPort: http }]
