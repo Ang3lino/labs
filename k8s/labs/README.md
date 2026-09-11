@@ -73,6 +73,7 @@ lab-XX-name/
 | 09 | Local → AWS | EKS, ECR, IAM, Terraform | "I migrate from local K8s to production cloud" |
 | 10 | [GPU Reservation with Volcano](10-volcano-gpu-reservation/) | Volcano Queues, PodGroups, gang scheduling, extended resources | "I built time-bounded GPU reservations on a scheduler with no reservation primitive" |
 | 11 | [LLM Serving Runtime](11-vllm-serving-runtime/) | vLLM, OpenAI API surface, Prometheus metrics, tensor parallelism | "I chose an inference runtime on evidence, not on what everyone assumed" |
+| 12 | [KubeRay RayCluster Quickstart](12-kuberay-raycluster-quickstart/) | Operators, CRDs, init-container ordering, readiness gates, Ray Jobs API | "I can stand up a Ray cluster on any K8s distro and explain why the official quickstart appears to fail" |
 
 ### Platform Track (10-11)
 
