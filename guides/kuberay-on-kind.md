@@ -179,9 +179,82 @@ why the job takes a minute even after pods are `Running`.
 | head | `rayproject/ray:2.52.0` | cpu 1, mem 2Gi | cpu 1, mem 5Gi |
 | worker ×1 | `rayproject/ray:2.52.0` | cpu 200m | cpu 1 |
 
-The sample's Python is a smoke test: a `@ray.remote` Counter actor incremented 5 times, plus
-two asserts that verify the runtime env actually applied (`counter_name == "test_counter"`,
-`requests.__version__ == "2.26.0"`). If `runtimeEnvYAML` silently failed, the job fails loudly.
+### The Python, and the Ray add-ons in it
+
+Pulled straight from the running cluster:
+
+```bash
+kubectl get configmap ray-job-code-sample -o jsonpath='{.data.sample_code\.py}'
+```
+
+```python
+import ray
+import os
+import requests
+
+ray.init()
+
+@ray.remote
+class Counter:
+    def __init__(self):
+        # Used to verify runtimeEnv
+        self.name = os.getenv("counter_name")
+        assert self.name == "test_counter"
+        self.counter = 0
+
+    def inc(self):
+        self.counter += 1
+
+    def get_counter(self):
+        return "{} got {}".format(self.name, self.counter)
+
+counter = Counter.remote()
+
+for _ in range(5):
+    ray.get(counter.inc.remote())
+    print(ray.get(counter.get_counter.remote()))
+
+# Verify that the correct runtime env was used for the job.
+assert requests.__version__ == "2.26.0"
+```
+
+Strip the Ray bits and it's an ordinary class incremented five times. Everything that makes it
+distributed is an add-on layered on top of plain Python:
+
+| Add-on | What it does |
+|---|---|
+| `ray.init()` | Connects to the cluster. Inside a KubeRay pod it reads the operator-injected `RAY_ADDRESS` and **joins the existing cluster** — it does not start a local one. Same line on your laptop spins up a single-node Ray instead, which is why the script is portable unchanged. |
+| `@ray.remote` on a **class** | Turns it into an **Actor** — a stateful process living on some node, holding `self.counter` across calls. On a **function** it would create a stateless **Task** instead. That's the whole API surface: tasks for stateless work, actors for stateful. |
+| `Counter.remote()` | Not `Counter()`. Asks the Ray scheduler to place an actor process somewhere in the cluster and returns an **ActorHandle immediately** — the constructor may not have run yet. |
+| `counter.inc.remote()` | Not `counter.inc()`. Sends the method call to wherever that actor lives and returns an **ObjectRef** (a future) immediately. Non-blocking. |
+| `ray.get(ref)` | **Blocks** and pulls the value out of Ray's distributed object store. This is the only synchronization point in the script. |
+
+The `.remote()` suffix is the seam between local and distributed. Forget it and you silently
+call a plain method on a handle, which errors — a good thing, since the alternative would be
+code that works locally and deadlocks in the cluster.
+
+> **Gotcha — the object store is that `/dev/shm` mount.** The `shared-mem` emptyDir with
+> `Medium: Memory, SizeLimit: 5Gi` in the pod spec isn't incidental; it *is* Ray's shared-memory
+> object store, where `ray.get` reads from. Undersize it and you get spilling to disk or
+> out-of-memory kills on large objects. It's the one volume you should size deliberately.
+
+> **Gotcha — actor CPU defaults.** Tasks default to `num_cpus=1`. Actors default to **1 CPU for
+> scheduling but 0 for running**, so an unbounded number of actors can pile onto one node once
+> placed. Pin it explicitly with `@ray.remote(num_cpus=2)` when it matters — and remember this is
+> Ray's accounting, entirely separate from the k8s `requests` the scheduler uses.
+
+### The two add-ons under test
+
+The script is a smoke test for `runtimeEnvYAML`, and both asserts exist to make a silent failure
+loud:
+
+| Assert | Proves |
+|---|---|
+| `self.name == "test_counter"` | `env_vars` reached the **actor process on a worker pod** — not just the driver. Env propagation across the cluster works. |
+| `requests.__version__ == "2.26.0"` | The `pip:` pins were installed into the job's runtime env at runtime, overriding whatever the base image ships. |
+
+Together they verify the runtime-env machinery end to end. That verification is the entire point
+of the sample — the counter itself computes nothing.
 
 ### Defaults and knobs worth knowing
 
@@ -198,7 +271,6 @@ Commented out in the sample, but they matter:
 ### Reading it back
 
 ```bash
-kubectl get configmap ray-job-code-sample -o jsonpath='{.data.sample_code\.py}'
 kubectl get rayjob rayjob-sample -o yaml | yq 'del(.status, .metadata.annotations)'
 ```
 
