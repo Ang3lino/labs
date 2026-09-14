@@ -200,6 +200,33 @@ kubectl logs <name>                                 # App logs
 kubectl logs <name> --previous                      # Crashed container logs
 ```
 
+### Pending means one thing only
+
+**The pod was never assigned to a node.** Not crashing, not pulling — never placed. So there's
+exactly one component to interrogate: the scheduler. Its verdict is always in `describe` Events,
+in plain English:
+
+```
+Warning  FailedScheduling  default-scheduler
+0/1 nodes are available: 1 Insufficient cpu.
+```
+
+Common constraints it names: `Insufficient cpu/memory`, `node(s) had untolerated taint`,
+`didn't match node selector`, `had volume node affinity conflict`.
+
+Then quantify — supply vs. already-spoken-for vs. demand:
+
+```bash
+kubectl get node <node> -o jsonpath='{.status.allocatable.cpu}'   # supply
+kubectl describe nodes | grep -A 10 "Allocated resources"          # already requested
+kubectl get pod <name> -o jsonpath='{.spec.containers[*].resources}'  # demand
+```
+
+**The scheduler packs by `requests` — never `limits`, never actual usage.** A node sitting at 3%
+CPU will still reject a pod whose request doesn't fit the unreserved remainder.
+
+Worked example end to end: [KubeRay on kind](kuberay-on-kind.md).
+
 ## Exam speed workflow
 
 1. `--dry-run=client -o yaml > file.yaml` → generate skeleton
