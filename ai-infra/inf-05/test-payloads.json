@@ -1,0 +1,63 @@
+{
+  "valid_model": {
+    "model_name": "llama-3-8b-instruct",
+    "promotion_state": "Production",
+    "tags": {
+      "runtime": "vllm",
+      "runtime_version": "0.5.0",
+      "quantization_precision": "bf16",
+      "tensor_parallel_degree": "1",
+      "accelerator": "L40S",
+      "max_context": "8192",
+      "evaluated_concurrency": "100",
+      "preprocessing_tokenizer": "hf/llama3",
+      "resource_profile": "gpu.1x",
+      "artifact_digest": "sha256:a1b2c3d4e5f6...",
+      "owning_team": "forecasting-squad"
+    }
+  },
+  "missing_field_model": {
+    "model_name": "gemma-2b",
+    "promotion_state": "Production",
+    "tags": {
+      "runtime": "vllm",
+      "quantization_precision": "fp16",
+      "tensor_parallel_degree": "1",
+      "owning_team": "data-science"
+    }
+  },
+  "unpromoted_model": {
+    "model_name": "mixtral-8x7b",
+    "promotion_state": "Staging",
+    "tags": {
+      "runtime": "vllm",
+      "runtime_version": "0.4.0",
+      "quantization_precision": "awq",
+      "tensor_parallel_degree": "2",
+      "accelerator": "L40S",
+      "max_context": "32000",
+      "evaluated_concurrency": "50",
+      "preprocessing_tokenizer": "hf/mixtral",
+      "resource_profile": "gpu.2x",
+      "artifact_digest": "sha256:99999999...",
+      "owning_team": "nlp-research"
+    }
+  },
+  "invalid_tp_model": {
+    "model_name": "llama-120b",
+    "promotion_state": "Production",
+    "tags": {
+      "runtime": "vllm",
+      "runtime_version": "0.5.0",
+      "quantization_precision": "fp8",
+      "tensor_parallel_degree": "4",
+      "accelerator": "L40S",
+      "max_context": "4096",
+      "evaluated_concurrency": "10",
+      "preprocessing_tokenizer": "hf/llama-120b",
+      "resource_profile": "gpu.4x",
+      "artifact_digest": "sha256:zzzzzzzz...",
+      "owning_team": "nlp-research"
+    }
+  }
+}
