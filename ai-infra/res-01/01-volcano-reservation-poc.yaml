@@ -1,0 +1,53 @@
+---
+# 1. The "Reservation"
+# Based on our decision, a Reservation is expressed as a dedicated Volcano Queue.
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: Queue
+metadata:
+  name: res-team-alpha-tuesday
+spec:
+  weight: 1
+  # The capability acts as the hard ceiling.
+  capability:
+    # Instead of standard nvidia.com/gpu, we use the topology-aware resource
+    platform.io/gpu-p2p: "2"
+  # Deserved is the guaranteed floor.
+  deserved:
+    platform.io/gpu-p2p: "2"
+  reclaimable: false
+
+---
+# 2. The Gang-Scheduling Wrapper
+# This groups our AI job into a single unit.
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: PodGroup
+metadata:
+  name: team-alpha-llm-job
+spec:
+  minMember: 2 # All 2 pods must start together, or none do.
+  queue: res-team-alpha-tuesday # It is submitted to the dedicated reservation queue!
+
+---
+# 3. The Workload
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: team-alpha-llm-job
+spec:
+  parallelism: 2
+  template:
+    metadata:
+      annotations:
+        scheduling.volcano.sh/group-name: team-alpha-llm-job
+    spec:
+      schedulerName: volcano
+      restartPolicy: Never
+      containers:
+      - name: worker
+        image: ubuntu:latest
+        command: ["sleep", "3600"]
+        resources:
+          limits:
+            platform.io/gpu-p2p: "1"
+          requests:
+            platform.io/gpu-p2p: "1"
