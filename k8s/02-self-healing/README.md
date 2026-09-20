@@ -18,6 +18,11 @@ Your ML inference server crashes randomly after processing ~50 requests (memory 
 - `kubectl` access
 - Lab 01 familiarity (build/apply/curl basics)
 
+## Concepts: Liveness vs Readiness Probes
+
+- **Liveness Probe ("Am I alive?"):** K8s **restarts** the container on failure. It recovers from unrecoverable states (e.g., deadlocks, infinite loops, memory leaks). If an ML server runs out of memory and returns 500s, restarting fixes it.
+- **Readiness Probe ("Am I ready for traffic?"):** K8s **stops sending traffic** to the pod on failure (removes it from the Service endpoints) but does *not* restart it. It protects clients from hitting a pod still booting up (e.g., loading a large ML model into memory).
+
 ## Step-by-Step Instructions
 
 1. Build the image:
@@ -70,7 +75,14 @@ Your ML inference server crashes randomly after processing ~50 requests (memory 
    kubectl describe pod <pod-name>
    ```
 
-   Look for probe failures and restart events.
+
+   Look for probe failures and restart events. You should see evidence like this in the `Events` section:
+
+   ```text
+   Warning  Unhealthy  40s                  kubelet            Liveness probe failed: HTTP probe failed with statuscode: 500
+   Normal   Killing    20s (x2 over 2m)     kubelet            spec.containers{ml-self-healing}: Container ml-self-healing failed liveness probe, will be restarted
+   Normal   Pulled     20s                  kubelet            Container image "ml-lab-02:latest" already present on machine
+   ```
 
 ## Verification Steps
 
