@@ -18,11 +18,16 @@ spec:
       - name: vllm
         # Using the official CPU image. Note: requires AVX512 on the host node's CPU.
         image: vllm/vllm-openai:latest
-        command: ["python3", "-m", "vllm.entrypoints.openai.api_server"]
+        command: ["vllm", "serve"]
         args:
-        - "--model=facebook/opt-125m"
+        - "facebook/opt-125m"
+        - "--device=cpu"
         - "--port=8000"
         - "--enforce-eager"
+        - "--dtype=float32"
+        env:
+        - name: VLLM_TARGET_DEVICE
+          value: "cpu"
         ports:
         - containerPort: 8000
           name: http
