@@ -25,6 +25,8 @@ spec:
         - "--port=8000"
         - "--enforce-eager"
         - "--dtype=float32"
+        - "--gpu-memory-utilization=0.4"
+        - "--max-model-len=512"
         ports:
         - containerPort: 8000
           name: http
