@@ -46,12 +46,18 @@ Bootstrap runs asynchronously via `user_data`. SSH in and tail the log:
 ```bash
 ssh -i ~/.ssh/ai-infra ubuntu@<public_ip>
 tail -f /var/log/bootstrap.log
-# Done when: "Bootstrap complete" appears in /var/log/bootstrap.done
+```
+
+Done when the file exists:
+
+```bash
+# On the instance:
+ls /var/log/bootstrap.done
 ```
 
 Bootstrap installs: `docker`, `git`, `kubectl`, `jq`, `htop`,
 clones the repo to `/home/ubuntu/labs`, pulls the vLLM CPU image,
-and pre-caches `facebook/opt-125m`.
+and pre-caches `facebook/opt-125m`. Takes ~4 min on a t3.2xlarge.
 
 ### 3. Run the vLLM PoC
 
@@ -82,7 +88,8 @@ From the EC2 instance:
 bash ~/labs/ai-infra/inf-01/scripts/test-openai-surface.sh localhost:8000
 ```
 
-Or from your local machine (port-forward over SSH):
+Or from your local machine (port-forward over SSH). Free port 8000 first if
+something is already using it (`pkill -f "port-forward.*8000"`):
 
 ```bash
 ssh -i ~/.ssh/ai-infra -L 8000:localhost:8000 ubuntu@<public_ip> -N &

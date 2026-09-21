@@ -20,6 +20,9 @@ curl -s http://${HOST_PORT}/v1/completions \
   }" | jq '{id, model, choices: [.choices[0] | {text, finish_reason}]}'
 
 echo -e "\n=== C3: Completions (Streaming / SSE) ==="
+# Capture stream tokens to a temp file to avoid stdout-flush ordering issues via SSH.
+_TMP=$(mktemp)
+set +e
 curl -N -s http://${HOST_PORT}/v1/completions \
   -H "Content-Type: application/json" \
   -d "{
@@ -27,8 +30,26 @@ curl -N -s http://${HOST_PORT}/v1/completions \
     \"prompt\": \"One two three\",
     \"max_tokens\": 20,
     \"stream\": true
-  }" | grep "^data:" | grep -v "\[DONE\]" | head -5 | jq -r '.choices[0].text' 2>/dev/null | tr -d '\n'
-echo -e "\n\n=== C5: Prometheus Metrics (queue depth + TTFT) ==="
-curl -s http://${HOST_PORT}/metrics | grep -E "vllm:e2e_request_latency|vllm:time_to_first_token|vllm:num_requests_waiting|vllm:gpu_cache_usage" | head -10
+  }" | python3 -c "
+import sys, json
+out = []
+for line in sys.stdin:
+    line = line.strip()
+    if not line.startswith('data:') or '[DONE]' in line:
+        continue
+    try:
+        out.append(json.loads(line[5:])['choices'][0]['text'])
+    except Exception:
+        pass
+print(''.join(out))
+" > "${_TMP}"
+set -e
+cat "${_TMP}"
+rm -f "${_TMP}"
+
+echo "=== C5: Prometheus Metrics (queue depth + TTFT) ==="
+curl -s http://${HOST_PORT}/metrics \
+  | grep -E "vllm:e2e_request_latency|vllm:time_to_first_token|vllm:num_requests_waiting|vllm:gpu_cache_usage" \
+  | head -10
 
 echo -e "\n=== Done ==="
