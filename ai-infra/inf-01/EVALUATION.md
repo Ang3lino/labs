@@ -5,6 +5,7 @@ This document captures the hands-on evaluation of our four candidate runtimes ba
 *(For a high-level summary of the architectural context, hardware constraints, and final decision, see `Serving_Runtime_Evaluation_and_Selection.md`.)*
 
 ## 1. How KubeRay Fits In
+
 KubeRay acts as our **Orchestrator**. It watches queue depth metrics and spins up/routes traffic to the execution runtime pods. The runtimes evaluated below act as the **Execution layer** living *inside* those KubeRay pods.
 
 ## 2. Evaluation Matrix
@@ -27,12 +28,14 @@ Our specific hardware constraint (3 × L40S, PCIe Gen4, no NVLink) means that si
 | C8 | Licensing / Entitlement required | | | | |
 
 ## 3. POC Usage
+
 You can test the API surfaces locally using the CPU-only POC deployments provided in this directory:
 1. `kubectl apply -f 01-vllm-cpu-poc.yaml`
 2. `kubectl port-forward svc/vllm-poc-svc 8000:8000`
 3. Run `scripts/test-openai-surface.sh localhost:8000` to verify criteria C3 and C4.
 
 ## 4. Final Recommendation
+
 *(To be filled out after the matrix is completed and team review)*
 - **Chosen Runtime(s):**
 - **Reasoning:**

@@ -4,11 +4,13 @@
 **Story:** INF-05 Consume the registry contract, and refuse artifacts that do not carry it
 
 ## 1. Overview
-This Proof of Concept (PoC) demonstrates the deployment gating mechanism between the Model Registry (MLflow) and the Serving Layer (KubeRay). 
+
+This Proof of Concept (PoC) demonstrates the deployment gating mechanism between the Model Registry (MLflow) and the Serving Layer (KubeRay).
 
 To achieve a fully automated "promotion becomes a deployment" workflow, we enforce a strict **Metadata Contract**. If a Data Scientist promotes a model that is missing critical operational parameters, the deployment is automatically rejected before it ever touches the Kubernetes cluster.
 
 ## 2. The Contract Fields
+
 Every artifact promoted to Production must carry the following 11 fields as tags in MLflow. The serving layer reads these tags to configure the RayService manifest.
 
 1. `runtime`: The execution engine (e.g., `vllm`).
@@ -24,6 +26,7 @@ Every artifact promoted to Production must carry the following 11 fields as tags
 11. `owning_team`: The billing/attribution identifier.
 
 ## 3. Enforcement Rules
+
 The deployment webhook (`contract_enforcer.py`) applies the following rules:
 
 *   **Strict Presence:** Missing any of the 11 fields results in an immediate failure naming the exact missing field. We do *not* guess or fall back to defaults.
@@ -32,6 +35,7 @@ The deployment webhook (`contract_enforcer.py`) applies the following rules:
 *   **Metric Attribution:** Upon successful validation, the `owning_team` field is extracted and injected as a label into the KubeRay manifest. This ensures the downstream Grafana consumption dashboard correctly attributes the GPU costs.
 
 ## 4. Running the PoC
+
 A Python-based simulation of the deployment webhook is provided in this directory.
 
 ```bash
@@ -40,6 +44,7 @@ python3 contract_enforcer.py
 ```
 
 ### Expected Output
+
 The script reads `test-payloads.json` and evaluates four scenarios:
 1.  **llama-3-8b-instruct:** Passes all checks. Shows how `owning_team` is propagated.
 2.  **gemma-2b:** Fails because it is missing the `runtime_version` (and other) fields.
@@ -47,4 +52,5 @@ The script reads `test-payloads.json` and evaluates four scenarios:
 4.  **llama-120b:** Fails because it requests a tensor-parallel degree of 4, exceeding the fleet ceiling of 2.
 
 ## 5. Cross-Epic Alignment
+
 Any gap between the 11 fields required above and the fields MLflow natively captures today must be documented as a checklist and handed to the Training Pipeline Epic owner. The Training Pipeline is responsible for ensuring these tags are attached during the CI/CD pipeline runs.

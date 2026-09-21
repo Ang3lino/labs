@@ -57,7 +57,7 @@ Your ML inference server crashes randomly after processing ~50 requests (memory 
    kubectl apply -f k8s/deployment-with-probes.yaml
    ```
 
-5. Hit `/predict` 60 times again:
+5. Hit `/predict` 60 times again (ensure port-forward service is running):
 
    ```bash
    for i in {1..60}; do
