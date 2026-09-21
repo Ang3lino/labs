@@ -16,7 +16,7 @@ os.environ["MLFLOW_MOCK"] = "1"
 
 from fastapi.testclient import TestClient
 
-from contract_enforcer import ValidateResponse, app, enforce_contract
+from src.contract_enforcer import ValidateResponse, app, enforce_contract
 
 client = TestClient(app)
 

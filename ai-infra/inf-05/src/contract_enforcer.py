@@ -8,7 +8,7 @@ returns either a RayService manifest (accepted) or a structured rejection
 with the exact failing field named.
 
 Usage:
-  uvicorn contract_enforcer:app --host 0.0.0.0 --port 8080
+  uvicorn src.contract_enforcer:app --host 0.0.0.0 --port 8080
 
 Environment:
   MLFLOW_TRACKING_URI  MLflow server URL (default: http://localhost:5000)
@@ -20,8 +20,8 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from manifest_builder import build_rayservice_manifest
-from mlflow_adapter import get_model_contract
+from .manifest_builder import build_rayservice_manifest
+from .mlflow_adapter import get_model_contract
 
 app = FastAPI(
     title="INF-05 Contract Enforcer",

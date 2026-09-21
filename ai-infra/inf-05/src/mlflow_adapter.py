@@ -52,7 +52,7 @@ def _mlflow_get(model_name: str, model_version: str) -> dict:
 # ---------------------------------------------------------------------------
 
 def _mock_get(model_name: str) -> dict:
-    payloads_path = Path(__file__).parent / "test-payloads.json"
+    payloads_path = Path(__file__).parent.parent / "test-payloads.json"
     payloads = json.loads(payloads_path.read_text())
     for payload in payloads.values():
         if payload.get("model_name") == model_name:
