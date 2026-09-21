@@ -16,21 +16,26 @@ spec:
     spec:
       containers:
       - name: vllm
-        # Using the official CPU image. Note: requires AVX512 on the host node's CPU.
-        image: vllm/vllm-openai:latest
+        # CPU-specific build — ships init_cpu_memory_env and CPU kernel extensions.
+        # The GPU image (vllm/vllm-openai) lacks these C++ ops and cannot run on CPU.
+        image: vllm/vllm-openai-cpu:latest
         command: ["vllm", "serve"]
         args:
         - "facebook/opt-125m"
-        - "--device=cpu"
         - "--port=8000"
         - "--enforce-eager"
         - "--dtype=float32"
-        env:
-        - name: VLLM_TARGET_DEVICE
-          value: "cpu"
         ports:
         - containerPort: 8000
           name: http
+        volumeMounts:
+        - name: shm
+          mountPath: /dev/shm
+      volumes:
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 512Mi
 ---
 apiVersion: v1
 kind: Service
