@@ -1,6 +1,6 @@
 # INF-01 Runtime Evaluation Matrix
 
-This document captures the hands-on evaluation of our four candidate runtimes based on the criteria in the INF-01 story. 
+This document captures the hands-on evaluation of our four candidate runtimes based on the criteria in the INF-01 story.
 
 *(For a high-level summary of the architectural context, hardware constraints, and final decision, see `Serving_Runtime_Evaluation_and_Selection.md`.)*
 
@@ -13,11 +13,12 @@ KubeRay acts as our **Orchestrator**. It watches queue depth metrics and spins u
 Our specific hardware constraint (3 × L40S, PCIe Gen4, no NVLink) means that single-node efficiency (TP=1) and memory management are critical. We evaluated the candidates against these requirements:
 
 **Definitions:**
+
 - **(r)** = Read from documentation (not yet tested on hardware)
 - **(m)** = Measured on actual hardware / cluster via POCs
 
 | # | Criterion | vLLM | NVIDIA NIM | Triton Inference Server | TensorRT-LLM |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | C1 | Tensor-parallel (TP) ≤ 2 | | | | |
 | C2 | Continuous/Dynamic batching | | | | |
 | C3 | Token streaming | | | | |
@@ -30,13 +31,15 @@ Our specific hardware constraint (3 × L40S, PCIe Gen4, no NVLink) means that si
 ## 3. POC Usage
 
 You can test the API surfaces locally using the CPU-only POC deployments provided in this directory:
+
 1. `kubectl apply -f 01-vllm-cpu-poc.yaml`
 2. `kubectl port-forward svc/vllm-poc-svc 8000:8000`
 3. Run `scripts/test-openai-surface.sh localhost:8000` to verify criteria C3 and C4.
 
 ## 4. Final Recommendation
 
-*(To be filled out after the matrix is completed and team review)*
+To be filled out after the matrix is completed and team review:
+
 - **Chosen Runtime(s):**
 - **Reasoning:**
 - **Version to Pin:**

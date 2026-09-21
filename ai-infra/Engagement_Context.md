@@ -42,30 +42,31 @@ The Platform Team is building an on-prem AI/LLM inference platform for the Clien
 - GPU1 has **1 Gig networking only**. 10 Gig needs a Gen 12 NIC, limited inventory.
 - Storage: redundant SAN. Drives ~15–16 TB each, 12 per server. **SAN is not required to start** — begin on local storage, add HBAs later.
 - Top-of-rack: L2 switch, managed via labs as a service. **No upstream access, no PAN/WAF appliances today.**
-- **NVLink — resolved.** **The L40S does not support NVLink at all**. All inter-GPU traffic on GPU One goes over **PCIe Gen4 x16 at 64 GB/s**. **MIG is likewise unsupported on L40S**, so GPU isolation cannot be hardware-enforced. 
+- **NVLink — resolved.** **The L40S does not support NVLink at all**. All inter-GPU traffic on GPU One goes over **PCIe Gen4 x16 at 64 GB/s**. **MIG is likewise unsupported on L40S**, so GPU isolation cannot be hardware-enforced.
 
 > **Reconciled:** The fleet is **3 × L40S on one host, PCIe-only, no bridge**. Tensor parallelism at TP=2 runs over PCIe and is a *capacity* mechanism for models exceeding 48 GB, not a latency optimisation — prefer TP=1 with one replica per GPU.
 
 ## 6. Identity — the single largest schedule risk
 
-- **Okta = authentication/SSO only. SailPoint = authorization, groups, roles.** 
+- **Okta = authentication/SSO only. SailPoint = authorization, groups, roles.**
 - Both SAML and OIDC supported; **OIDC is the preferred path**.
 - **No direct admin or API access** to workforce IAM. Everything is ticket-based.
-- **Every authenticated component needs its own ID** before SSO can be configured — Grafana, Ray, MinIO, MLflow each require a separate request and security review. 
+- **Every authenticated component needs its own ID** before SSO can be configured — Grafana, Ray, MinIO, MLflow each require a separate request and security review.
 - Cluster/workload service identities (cron, Kubernetes) **sit outside Okta** and need a separate design.
 
 ## 7. Data lake
 
 - Scale: **~800 engineers, ~50% peak concurrency (~400 simultaneous)**. **Use ~181 TB** as the current footprint, growing **~15%/yr**, default **3-year retention**.
-- Example workload: 2–10 MB files today, up to 100 MB future; ~10K files/day rising to ~50K; **80–100 GB/day**. 
-- **MinIO is end-of-life.** An S3-compatible replacement is required. Candidates: **SeaweedFS** vs **Ceph RGW**. 
+- Example workload: 2–10 MB files today, up to 100 MB future; ~10K files/day rising to ~50K; **80–100 GB/day**.
+- **MinIO is end-of-life.** An S3-compatible replacement is required. Candidates: **SeaweedFS** vs **Ceph RGW**.
+
 > **Reconciled:** SeaweedFS is the working assumption; Ceph RGW is the live challenger; the evaluation is open.
 
 ## 8. Security posture
 
 - **Network isolation recommended**: put the AI solution in a sandbox, out-of-band network for admin/iLO and in-band for LLM application services.
 - **PII handling undecided**: inline appliance before data enters the lake vs. handling at the ingestion layer.
-- **Secrets: OpenBAO** on-prem vault as source of truth, exported into Kubernetes short-term. 
+- **Secrets: OpenBAO** on-prem vault as source of truth, exported into Kubernetes short-term.
 - Access reviews today are Okta + SailPoint + custom scripts with weekly reporting.
 
 ## 9. Open questions carried forward

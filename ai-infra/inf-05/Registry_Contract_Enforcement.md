@@ -29,10 +29,10 @@ Every artifact promoted to Production must carry the following 11 fields as tags
 
 The deployment webhook (`contract_enforcer.py`) applies the following rules:
 
-*   **Strict Presence:** Missing any of the 11 fields results in an immediate failure naming the exact missing field. We do *not* guess or fall back to defaults.
-*   **Promotion Gating:** Artifacts with a state other than `Production` (or `Promoted`) are rejected.
-*   **Hardware Ceiling:** Tensor Parallelism (`tensor_parallel_degree`) above `2` is strictly rejected. This is tied to our L40S PCIe constraints, preventing developers from attempting to deploy 120B+ models that require NVLink.
-*   **Metric Attribution:** Upon successful validation, the `owning_team` field is extracted and injected as a label into the KubeRay manifest. This ensures the downstream Grafana consumption dashboard correctly attributes the GPU costs.
+- **Strict Presence:** Missing any of the 11 fields results in an immediate failure naming the exact missing field. We do *not* guess or fall back to defaults.
+- **Promotion Gating:** Artifacts with a state other than `Production` (or `Promoted`) are rejected.
+- **Hardware Ceiling:** Tensor Parallelism (`tensor_parallel_degree`) above `2` is strictly rejected. This is tied to our L40S PCIe constraints, preventing developers from attempting to deploy 120B+ models that require NVLink.
+- **Metric Attribution:** Upon successful validation, the `owning_team` field is extracted and injected as a label into the KubeRay manifest. This ensures the downstream Grafana consumption dashboard correctly attributes the GPU costs.
 
 ## 4. Running the PoC
 
@@ -46,10 +46,11 @@ python3 contract_enforcer.py
 ### Expected Output
 
 The script reads `test-payloads.json` and evaluates four scenarios:
-1.  **llama-3-8b-instruct:** Passes all checks. Shows how `owning_team` is propagated.
-2.  **gemma-2b:** Fails because it is missing the `runtime_version` (and other) fields.
-3.  **mixtral-8x7b:** Fails because its promotion state is `Staging`, not `Production`.
-4.  **llama-120b:** Fails because it requests a tensor-parallel degree of 4, exceeding the fleet ceiling of 2.
+
+1. **llama-3-8b-instruct:** Passes all checks. Shows how `owning_team` is propagated.
+2. **gemma-2b:** Fails because it is missing the `runtime_version` (and other) fields.
+3. **mixtral-8x7b:** Fails because its promotion state is `Staging`, not `Production`.
+4. **llama-120b:** Fails because it requests a tensor-parallel degree of 4, exceeding the fleet ceiling of 2.
 
 ## 5. Cross-Epic Alignment
 

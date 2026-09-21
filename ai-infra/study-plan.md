@@ -19,7 +19,7 @@ Everything is ranked by **how soon it blocks delivery** and **how much of the pr
 These are the baseline technologies already running. You'll touch them daily.
 
 | # | Topic | Why It's Blocking | Study Target | Time |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | 1 | **Kubernetes (upstream)** | Every component runs on K8s. Requires cluster stand-up as code. | Deployments, Services, StatefulSets, DaemonSets, RBAC, ResourceQuotas, Namespaces, PVCs, NetworkPolicy. Multi-cluster patterns. | 10h |
 | 2 | **Proxmox** | Hypervisor for control plane VMs. | VM provisioning, templates, cloud-init, storage pools, networking bridges, GPU passthrough. | 4h |
 | 3 | **NVIDIA GPU Operator + Device Plugin** | GPU scheduling on K8s. Required for every inference workload. | Install operator, verify GPU discovery, node labeling (H200 vs L40S), MIG if applicable, time-slicing, DCGM exporter for metrics. | 4h |
@@ -37,7 +37,7 @@ These are the baseline technologies already running. You'll touch them daily.
 These are "New" or critical technologies for the parallel epics.
 
 | # | Topic | Why It's Blocking | Study Target | Time |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | 8 | **MLflow** | Baseline. Model registry, versioning. | Model Registry workflow, webhooks for CI/CD, artifact storage on SeaweedFS, tracking server on PostgreSQL, Prometheus metrics. | 5h |
 | 9 | **SeaweedFS** | New. Replaces MinIO. S3-compatible object storage. | weed master/volume/filer/s3 architecture, S3 API compatibility, bucket policies, replication for HA/DR, Iceberg REST catalog. | 6h |
 | 10 | **Argo Workflows + Argo Events** | New. Replaces Airflow. Pipeline execution. | Workflow CRD, container-per-step model, DAG templates, CronWorkflow, Argo Events Sensor + EventSource (SQS). | 6h |
@@ -57,7 +57,7 @@ These are "New" or critical technologies for the parallel epics.
 These support the hardening, HA/DR, security, and acceptance epics.
 
 | # | Topic | Why It's Blocking | Study Target | Time |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | 17 | **HA/DR patterns** | Primary to Secondary replication, failover drill, RPO/RTO documentation. | Cross-site SeaweedFS replication, PostgreSQL streaming replication or logical replication, model weight sync, K8s cluster federation. | 6h |
 | 18 | **Prometheus + Grafana + VictoriaLogs + Alertmanager** | Baseline. Observability. | ServiceMonitor/PodMonitor for Ray Serve metrics, GPU DCGM metrics, custom Grafana dashboards, VictoriaLogs, Alertmanager routing, SLO-based alerts. | 5h |
 | 19 | **Apache Iceberg + Apache Doris** | New. Data lake layer. | Iceberg tables over SeaweedFS, Doris as analytical store. | 4h |
@@ -73,7 +73,7 @@ These support the hardening, HA/DR, security, and acceptance epics.
 ## Tier 4 — Nice to Have / Deepen as Needed
 
 | # | Topic | When | Time |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 24 | **Qdrant** | Only if pgvector misses retrieval targets (status: Open) | 3h |
 | 25 | **Ray Data** | Embedding generation and dataset evaluation — already baseline, learn when touching RAG pipeline | 3h |
 | 26 | **Kubeflow Spark Operator vs Apache Spark Operator** | When the "Open" decision is made (compare CRDs) | 2h |
@@ -83,9 +83,10 @@ These support the hardening, HA/DR, security, and acceptance epics.
 
 ## Study Strategy
 
-**Total estimated study: ~115h across 13 weeks (~9h/week)**
+Total estimated study: ~115h across 13 weeks (~9h/week)
 
-**How to study each topic:**
+How to study each topic:
+
 1. Read official docs for 30 min to understand concepts
 2. Do the relevant lab from the `mlops-infra/` directory (labs cover K8s, GPU, vLLM, KServe, observability, Argo CD, KubeRay)
 3. Read the existing prototype code/configs — this project has a working baseline, so read before you build
