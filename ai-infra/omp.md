@@ -71,6 +71,31 @@ US East (N. Virginia/Ohio/Oregon), Standard on-demand tier, USD per 1M tokens. "
 | GLM 4.7 Flash | `amazon-bedrock/zai.glm-4.7-flash` | $0.07 | $0.40 | ✗ | ✗ | ✓ | ✓ | ✓ |
 | DeepSeek V3.2 | `amazon-bedrock/deepseek.v3.2` | $0.55 | $2.19 | ✗ | ✗ | ✗ | ✓ | ✓ |
 
+## 3. Benchmarks (SWE-bench Verified)
+
+Primary benchmark: **SWE-bench Verified** — 500 real-world GitHub issues requiring multi-file bug fixes, test execution, and patch generation. Measures autonomous software engineering capability.
+
+| Model | SWE-bench Verified | Source |
+|---|---|---|
+| Claude Opus 5 | Not published (estimated >85%) | `[INFERENCE]` — based on positioning |
+| Claude Sonnet 5 | **85.2%** | [Anthropic](https://www.anthropic.com), [llm-stats.com](https://llm-stats.com) |
+| Claude Haiku 4.5 | Not published (estimated 70-75%) | `[INFERENCE]` — based on Sonnet 5 delta |
+| GLM 5 | **77.8%** | [Z.ai](https://z.ai) |
+| Qwen3 Coder 480B | **69.6–71.2%** | [swebench.com](https://swebench.com), [OpenRouter](https://openrouter.ai) |
+| Kimi K2 Thinking | **71.3%** | [Moonshot AI](https://moonshot.ai) |
+| DeepSeek V3.2 | **67.8–73.1%** | [HuggingFace](https://huggingface.co), [Scale](https://scale.com) |
+| Kimi K2.5 | Not published (estimated 72-76%) | `[INFERENCE]` — K2.6 reports 80.2% |
+| MiniMax M2.5 | Not published (estimated 60-65%) | `[INFERENCE]` — no public SWE-bench |
+| GLM 4.7 Flash | Not published (estimated 65-70%) | `[INFERENCE]` — lighter GLM variant |
+| Nova Lite | Not published | Amazon doesn't report SWE-bench for Lite tier |
+| Nova Micro | Not published | Amazon doesn't report SWE-bench for Micro tier |
+
+**Key insight:** Claude Sonnet 5 leads at 85.2%, but GLM 5 (77.8%) and Qwen3 Coder (71%) achieve competitive scores at 3–5× lower output cost. Kimi K2 Thinking (71.3%) and DeepSeek V3.2 (67.8–73.1%) also punch above their price class.
+
+### Rankings with benchmark evidence
+
+Performance rankings now grounded by SWE-bench Verified scores where available. Models without published scores use `[INFERENCE]` based on model family positioning and spec parity.
+
 ---
 
 ## 3. Rankings per role
@@ -119,89 +144,6 @@ Example: If 5 models compete, the best performer gets 5 points, the worst gets 1
 ---
 
 ## 4. JSON exports — valid omp modelRoles configurations
-
-### Performance (best → worst per role)
-
-```json
-{
-  "performance": {
-    "default": [
-      { "rank": 1, "model": "Claude Sonnet 5", "omp_argument": "amazon-bedrock/us.anthropic.claude-sonnet-5" },
-      { "rank": 2, "model": "GLM 5", "omp_argument": "amazon-bedrock/zai.glm-5" },
-      { "rank": 3, "model": "Qwen3 Coder 480B A35B", "omp_argument": "amazon-bedrock/qwen.qwen3-coder-480b-a35b-v1:0" },
-      { "rank": 4, "model": "DeepSeek V3.2", "omp_argument": "amazon-bedrock/deepseek.v3.2" }
-    ],
-    "smol": [
-      { "rank": 1, "model": "Claude Haiku 4.5", "omp_argument": "amazon-bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0" },
-      { "rank": 2, "model": "Kimi K2.5", "omp_argument": "amazon-bedrock/moonshotai.kimi-k2.5" },
-      { "rank": 3, "model": "MiniMax M2.5", "omp_argument": "amazon-bedrock/minimax.minimax-m2.5" },
-      { "rank": 4, "model": "GLM 4.7 Flash", "omp_argument": "amazon-bedrock/zai.glm-4.7-flash" },
-      { "rank": 5, "model": "Nova Lite", "omp_argument": "amazon-bedrock/us.amazon.nova-lite-v1:0" },
-      { "rank": 6, "model": "Nova Micro", "omp_argument": "amazon-bedrock/us.amazon.nova-micro-v1:0" }
-    ],
-    "slow": [
-      { "rank": 1, "model": "Claude Opus 5", "omp_argument": "amazon-bedrock/us.anthropic.claude-opus-5" },
-      { "rank": 2, "model": "GLM 5", "omp_argument": "amazon-bedrock/zai.glm-5" },
-      { "rank": 3, "model": "Kimi K2 Thinking", "omp_argument": "amazon-bedrock/moonshot.kimi-k2-thinking" }
-    ]
-  }
-}
-```
-
-### Price (cheapest → priciest per role)
-
-```json
-{
-  "price": {
-    "default": [
-      { "rank": 1, "model": "Qwen3 Coder 480B A35B", "omp_argument": "amazon-bedrock/qwen.qwen3-coder-480b-a35b-v1:0", "output_price_usd_per_1m": 1.80 },
-      { "rank": 2, "model": "DeepSeek V3.2", "omp_argument": "amazon-bedrock/deepseek.v3.2", "output_price_usd_per_1m": 2.19 },
-      { "rank": 3, "model": "GLM 5", "omp_argument": "amazon-bedrock/zai.glm-5", "output_price_usd_per_1m": 3.20 },
-      { "rank": 4, "model": "Claude Sonnet 5", "omp_argument": "amazon-bedrock/us.anthropic.claude-sonnet-5", "output_price_usd_per_1m": 10.00 }
-    ],
-    "smol": [
-      { "rank": 1, "model": "Nova Micro", "omp_argument": "amazon-bedrock/us.amazon.nova-micro-v1:0", "output_price_usd_per_1m": 0.14 },
-      { "rank": 2, "model": "Nova Lite", "omp_argument": "amazon-bedrock/us.amazon.nova-lite-v1:0", "output_price_usd_per_1m": 0.24 },
-      { "rank": 3, "model": "GLM 4.7 Flash", "omp_argument": "amazon-bedrock/zai.glm-4.7-flash", "output_price_usd_per_1m": 0.40 },
-      { "rank": 4, "model": "MiniMax M2.5", "omp_argument": "amazon-bedrock/minimax.minimax-m2.5", "output_price_usd_per_1m": 1.20 },
-      { "rank": 5, "model": "Kimi K2.5", "omp_argument": "amazon-bedrock/moonshotai.kimi-k2.5", "output_price_usd_per_1m": 3.00 },
-      { "rank": 6, "model": "Claude Haiku 4.5", "omp_argument": "amazon-bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0", "output_price_usd_per_1m": 5.00 }
-    ],
-    "slow": [
-      { "rank": 1, "model": "Kimi K2 Thinking", "omp_argument": "amazon-bedrock/moonshot.kimi-k2-thinking", "output_price_usd_per_1m": 2.50 },
-      { "rank": 2, "model": "GLM 5", "omp_argument": "amazon-bedrock/zai.glm-5", "output_price_usd_per_1m": 3.20 },
-      { "rank": 3, "model": "Claude Opus 5", "omp_argument": "amazon-bedrock/us.anthropic.claude-opus-5", "output_price_usd_per_1m": 25.00 }
-    ]
-  }
-}
-```
-
-### Value (best value → worst per role)
-
-```json
-{
-  "performance_price": {
-    "default": [
-      { "rank": 1, "model": "Qwen3 Coder 480B A35B", "omp_argument": "amazon-bedrock/qwen.qwen3-coder-480b-a35b-v1:0", "value_score": 1.11 },
-      { "rank": 2, "model": "GLM 5", "omp_argument": "amazon-bedrock/zai.glm-5", "value_score": 0.94 },
-      { "rank": 3, "model": "DeepSeek V3.2", "omp_argument": "amazon-bedrock/deepseek.v3.2", "value_score": 0.46 },
-      { "rank": 4, "model": "Claude Sonnet 5", "omp_argument": "amazon-bedrock/us.anthropic.claude-sonnet-5", "value_score": 0.40 }
-    "smol": [
-      { "rank": 1, "model": "Nova Lite", "omp_argument": "amazon-bedrock/us.amazon.nova-lite-v1:0", "value_score": 8.33 },
-      { "rank": 2, "model": "GLM 4.7 Flash", "omp_argument": "amazon-bedrock/zai.glm-4.7-flash", "value_score": 7.50 },
-      { "rank": 3, "model": "Nova Micro", "omp_argument": "amazon-bedrock/us.amazon.nova-micro-v1:0", "value_score": 7.14 },
-      { "rank": 4, "model": "MiniMax M2.5", "omp_argument": "amazon-bedrock/minimax.minimax-m2.5", "value_score": 3.33 },
-      { "rank": 5, "model": "Kimi K2.5", "omp_argument": "amazon-bedrock/moonshotai.kimi-k2.5", "value_score": 1.67 },
-      { "rank": 6, "model": "Claude Haiku 4.5", "omp_argument": "amazon-bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0", "value_score": 1.20 }
-    ],
-    "slow": [
-      { "rank": 1, "model": "GLM 5", "omp_argument": "amazon-bedrock/zai.glm-5", "value_score": 0.63 },
-      { "rank": 2, "model": "Kimi K2 Thinking", "omp_argument": "amazon-bedrock/moonshot.kimi-k2-thinking", "value_score": 0.40 },
-      { "rank": 3, "model": "Claude Opus 5", "omp_argument": "amazon-bedrock/us.anthropic.claude-opus-5", "value_score": 0.12 }
-    ]
-  }
-}
-```
 
 ### Ready-to-use omp config commands
 
