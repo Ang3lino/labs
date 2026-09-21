@@ -88,10 +88,10 @@ Example: If 5 models compete, the best performer gets 5 points, the worst gets 1
 
 | Model | Performance Rank | Price Rank | Value Score (pts/$) | Value Rank |
 |---|---|---|---|---|
-| Claude Sonnet 5 | 1 | 3 ($10.00) | 4/10.00 = 0.40 | 3 |
-| GLM 5 | 2 | 2 ($3.20) | 3/3.20 = 0.94 | 2 |
+| Claude Sonnet 5 | 1 | 4 ($10.00) | 4/10.00 = 0.40 | 4 |
+| GLM 5 | 2 | 3 ($3.20) | 3/3.20 = 0.94 | 2 |
 | Qwen3 Coder 480B | 3 | 1 ($1.80) | 2/1.80 = 1.11 | 1 |
-| DeepSeek V3.2 | 4 | 4 ($2.19) | 1/2.19 = 0.46 | 4 |
+| DeepSeek V3.2 | 4 | 2 ($2.19) | 1/2.19 = 0.46 | 3 |
 
 ### `smol` (competing with Claude Haiku 4.5)
 
@@ -155,9 +155,9 @@ Example: If 5 models compete, the best performer gets 5 points, the worst gets 1
   "price": {
     "default": [
       { "rank": 1, "model": "Qwen3 Coder 480B A35B", "omp_argument": "amazon-bedrock/qwen.qwen3-coder-480b-a35b-v1:0", "output_price_usd_per_1m": 1.80 },
-      { "rank": 2, "model": "GLM 5", "omp_argument": "amazon-bedrock/zai.glm-5", "output_price_usd_per_1m": 3.20 },
-      { "rank": 3, "model": "Claude Sonnet 5", "omp_argument": "amazon-bedrock/us.anthropic.claude-sonnet-5", "output_price_usd_per_1m": 10.00 },
-      { "rank": 4, "model": "DeepSeek V3.2", "omp_argument": "amazon-bedrock/deepseek.v3.2", "output_price_usd_per_1m": 2.19 }
+      { "rank": 2, "model": "DeepSeek V3.2", "omp_argument": "amazon-bedrock/deepseek.v3.2", "output_price_usd_per_1m": 2.19 },
+      { "rank": 3, "model": "GLM 5", "omp_argument": "amazon-bedrock/zai.glm-5", "output_price_usd_per_1m": 3.20 },
+      { "rank": 4, "model": "Claude Sonnet 5", "omp_argument": "amazon-bedrock/us.anthropic.claude-sonnet-5", "output_price_usd_per_1m": 10.00 }
     ],
     "smol": [
       { "rank": 1, "model": "Nova Micro", "omp_argument": "amazon-bedrock/us.amazon.nova-micro-v1:0", "output_price_usd_per_1m": 0.14 },
@@ -186,7 +186,6 @@ Example: If 5 models compete, the best performer gets 5 points, the worst gets 1
       { "rank": 2, "model": "GLM 5", "omp_argument": "amazon-bedrock/zai.glm-5", "value_score": 0.94 },
       { "rank": 3, "model": "DeepSeek V3.2", "omp_argument": "amazon-bedrock/deepseek.v3.2", "value_score": 0.46 },
       { "rank": 4, "model": "Claude Sonnet 5", "omp_argument": "amazon-bedrock/us.anthropic.claude-sonnet-5", "value_score": 0.40 }
-    ],
     "smol": [
       { "rank": 1, "model": "Nova Lite", "omp_argument": "amazon-bedrock/us.amazon.nova-lite-v1:0", "value_score": 8.33 },
       { "rank": 2, "model": "GLM 4.7 Flash", "omp_argument": "amazon-bedrock/zai.glm-4.7-flash", "value_score": 7.50 },
