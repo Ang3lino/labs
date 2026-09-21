@@ -2,13 +2,23 @@
 
 Research for `omp config set modelRoles`, evaluating Chinese-origin models (DeepSeek, Moonshot AI/Kimi, Qwen, Z.AI/GLM, MiniMax) and Amazon Nova against the currently configured Anthropic models, for the three omp roles: `default`, `smol`, `slow`.
 
-Current config:
+Previous config (pre-fix, what threw the Bedrock 400):
 
 ```json
 {
-  "default": "amazon-bedrock/us.anthropic.claude-sonnet-5",
-  "smol":    "amazon-bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0",
-  "slow":    "amazon-bedrock/us.anthropic.claude-opus-5"
+  "default": "amazon-bedrock/global.moonshotai.kimi-k3",
+  "smol":    "amazon-bedrock/zai.glm-4.7-flash",
+  "slow":    "amazon-bedrock/zai.glm-5"
+}
+```
+
+**Adopted config** (verified against omp's live model catalog and a real tool-call turn on each role — see §0):
+
+```json
+{
+  "default": "amazon-bedrock/zai.glm-5",
+  "smol":    "amazon-bedrock/minimax.minimax-m2.5",
+  "slow":    "amazon-bedrock/moonshotai.kimi-k2.5"
 }
 ```
 
@@ -17,6 +27,16 @@ Current config:
 **Important caveat:** Performance rankings below are `[INFERENCE]`, not benchmark results. AWS's model-card pages publish zero benchmark scores, and Claude Sonnet 5 / Opus 5 / Kimi K3 / GLM 5 are all too recent for third-party evals to exist. Rankings are derived from: (1) each model card's own positioning language, (2) spec parity (context window, max output tokens) vs. the Claude model in that role, (3) directional reputation of that model family's prior generation on public benchmarks. Price figures are hard data pulled directly from the AWS pricing page and are not inference.
 
 ---
+## 0. Errata (2026-09-21 follow-up) — two bugs found applying this doc
+
+Applying the config below hit `Bedrock HTTP 400: toolConfig.tools.N.member.toolSpec.description ... length >= 1`. Root-caused and fixed; **this doc's rankings/catalog for Kimi K3 are also wrong** and should not be trusted going forward.
+
+**Bug 1 — `inlineToolDescriptors=auto` strips tool descriptions for non-Gemini Bedrock models too.** Confirmed by inspecting the raw failing request (`~/.omp/logs/http-400-requests/`): every one of the ~12 `toolSpec.description` fields was sent as `""` to `zai.glm-5` on the Bedrock Converse API. `inlineToolDescriptors` (default `auto`) is documented to enable description-stripping "for Gemini models" only and disable it otherwise, but it also fired for this GLM-5 call (likely because GLM-5 was invoked with `additionalModelRequestFields.thinking`, matching whatever heuristic `auto` actually uses instead of a strict Gemini-provider check). Anthropic models never hit this because Claude tool calls on Bedrock don't route through the generic `toolConfig` schema the same way. **Fix:** `omp config set inlineToolDescriptors off` (done; also updated `omp` 18.2.5 → 18.2.8, no changelog evidence it alone fixes this, so keep the explicit override). Verified: identical GLM-5 + tools + thinking request now completes.
+
+**Bug 2 — "Kimi K3" does not exist in omp's Bedrock model catalog.** `omp models --json` (live-refreshed, matches AWS pricing figures for every other model) lists no `kimi-k3` selector under any vendor prefix — only `moonshot.kimi-k2-thinking` and `moonshotai.kimi-k2.5`. Direct invocation (`omp -p --model amazon-bedrock/global.moonshotai.kimi-k3`) returns `Model "amazon-bedrock/global.moonshotai.kimi-k3" not found`. Worse: setting it as a **role** (`modelRoles.default`) does not fail loudly — omp silently fell back to `google-antigravity/gemini-3.1-pro`, a non-Chinese model, with no error surfaced. Every Kimi K3 row in §1–§4 below is unusable until `omp models` actually lists it; treat this doc's Kimi K3 catalog claim as unverified/likely hallucinated by whatever produced it. Re-run `omp models --json | grep -i kimi` before ever pointing a role at it again.
+
+**Revised picks (real catalog + external SWE-bench-style signal, not the flawed §3 tables):** `default`→GLM-5 (best all-around reliability/cost among models that actually exist), `smol`→MiniMax M2.5 (cheap, punches above its weight, reasoning-capable), `slow`→Kimi K2.5 (long-context, low-hallucination, strongest genuine "thorough analysis" fit). All three confirmed via `omp -p --model <selector> ...` to resolve to themselves (no silent fallback) and to complete a real tool-calling turn.
+
 
 ## 1. Bedrock catalog — Chinese-origin providers
 
