@@ -75,20 +75,20 @@ US East (N. Virginia/Ohio/Oregon), Standard on-demand tier, USD per 1M tokens. "
 
 Primary benchmark: **SWE-bench Verified** — 500 real-world GitHub issues requiring multi-file bug fixes, test execution, and patch generation. Measures autonomous software engineering capability.
 
-| Model | SWE-bench Verified | Source |
-|---|---|---|
-| Claude Opus 5 | Not published (estimated >85%) | `[INFERENCE]` — based on positioning |
-| Claude Sonnet 5 | **85.2%** | [Anthropic](https://www.anthropic.com), [llm-stats.com](https://llm-stats.com) |
-| Claude Haiku 4.5 | Not published (estimated 70-75%) | `[INFERENCE]` — based on Sonnet 5 delta |
-| GLM 5 | **77.8%** | [Z.ai](https://z.ai) |
-| Qwen3 Coder 480B | **69.6–71.2%** | [swebench.com](https://swebench.com), [OpenRouter](https://openrouter.ai) |
-| Kimi K2 Thinking | **71.3%** | [Moonshot AI](https://moonshot.ai) |
-| DeepSeek V3.2 | **67.8–73.1%** | [HuggingFace](https://huggingface.co), [Scale](https://scale.com) |
-| Kimi K2.5 | Not published (estimated 72-76%) | `[INFERENCE]` — K2.6 reports 80.2% |
-| MiniMax M2.5 | Not published (estimated 60-65%) | `[INFERENCE]` — no public SWE-bench |
-| GLM 4.7 Flash | Not published (estimated 65-70%) | `[INFERENCE]` — lighter GLM variant |
-| Nova Lite | Not published | Amazon doesn't report SWE-bench for Lite tier |
-| Nova Micro | Not published | Amazon doesn't report SWE-bench for Micro tier |
+| Model | SWE-bench Verified | Source | Documentation |
+|---|---|---|---|
+| Claude Opus 5 | Not published (estimated >85%) | `[INFERENCE]` | [Anthropic Model Card](https://docs.anthropic.com/en/docs/about-claude/models) |
+| Claude Sonnet 5 | **85.2%** | [Anthropic](https://www.anthropic.com), [llm-stats.com](https://llm-stats.com) | [Anthropic Model Card](https://docs.anthropic.com/en/docs/about-claude/models) |
+| Claude Haiku 4.5 | Not published (estimated 70-75%) | `[INFERENCE]` | [Anthropic Model Card](https://docs.anthropic.com/en/docs/about-claude/models) |
+| GLM 5 | **77.8%** | [Z.ai](https://z.ai) | [Z.ai GLM-5](https://z.ai/glm-5) |
+| Qwen3 Coder 480B | **69.6–71.2%** | [swebench.com](https://swebench.com), [OpenRouter](https://openrouter.ai) | [Qwen Model Card](https://qwen.ai) |
+| Kimi K2 Thinking | **71.3%** | [Moonshot AI](https://moonshot.ai) | [Kimi K2 Docs](https://kimi.ai) |
+| DeepSeek V3.2 | **67.8–73.1%** | [HuggingFace](https://huggingface.co), [Scale](https://scale.com) | [DeepSeek Model Card](https://huggingface.co/deepseek-ai) |
+| Kimi K2.5 | Not published (estimated 72-76%) | `[INFERENCE]` | [Kimi K2 Docs](https://kimi.ai) |
+| MiniMax M2.5 | Not published (estimated 60-65%) | `[INFERENCE]` | [MiniMax HuggingFace](https://huggingface.co/MiniMax) |
+| GLM 4.7 Flash | Not published (estimated 65-70%) | `[INFERENCE]` | [Z.ai GLM-4.7](https://z.ai/glm-4) |
+| Nova Lite | Not published | Amazon | [AWS Nova Docs](https://docs.aws.amazon.com/bedrock/latest/userguide/model-nova.html) |
+| Nova Micro | Not published | Amazon | [AWS Nova Docs](https://docs.aws.amazon.com/bedrock/latest/userguide/model-nova.html) |
 
 **Key insight:** Claude Sonnet 5 leads at 85.2%, but GLM 5 (77.8%) and Qwen3 Coder (71%) achieve competitive scores at 3–5× lower output cost. Kimi K2 Thinking (71.3%) and DeepSeek V3.2 (67.8–73.1%) also punch above their price class.
 
