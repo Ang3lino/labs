@@ -53,3 +53,38 @@ No single tool does everything perfectly.
 - **NVIDIA NIM:** Technically excellent, but requires a paid NVIDIA AI Enterprise license, which is currently unresolved.
 - **Triton Inference Server:** While it can run anything, it doesn't natively speak the OpenAI API or expose LLM-specific metrics without a heavy translation layer (adapter cost).
 - **TensorRT-LLM:** This is just a fast math library, not a web server. We would have to build the API and batching logic ourselves.
+
+---
+
+## Glossary
+
+### Hardware
+
+**NVIDIA L40S**
+A data-center GPU designed for inference and graphics workloads. Fits into a standard PCIe slot — no special motherboard required. Each card carries 48 GB of VRAM and ~800 GB/s of internal memory bandwidth. It is the "L" (inference) line, not the "H" line (H100/H200) which is optimised for training. The L40S does not support NVLink.
+
+**VRAM (Video RAM)**
+Memory that lives physically on the GPU itself. Completely separate from system RAM. The entire model — weights, activations, and KV cache — must fit in VRAM before a single request can be served. The L40S has 48 GB per card (144 GB across all three), at ~800 GB/s bandwidth. System RAM is larger (≥512 GB) but ~8× slower and unreachable by the GPU directly during inference.
+
+**NVLink**
+NVIDIA's proprietary high-speed direct interconnect between GPUs on the same server. Delivers ~900 GB/s GPU-to-GPU bandwidth. Without it, GPUs can only communicate by routing traffic through the CPU over PCIe (~64 GB/s — roughly 14× slower). **The L40S does not support NVLink.** This is the binding hardware constraint for the entire platform: it rules out large models that require fast multi-GPU synchronisation.
+
+**PCIe (Peripheral Component Interconnect Express)**
+The slot and bus standard that connects expansion cards (GPUs, SSDs, NICs) to the CPU. Gen4 at x16 lanes provides ~64 GB/s bidirectional bandwidth. On this cluster PCIe is the *only* path for GPU-to-GPU traffic, making it the universal bottleneck for any workload that must split work across GPUs.
+
+**Tensor Parallelism (TP)**
+A technique that shards a single model's weight matrices across multiple GPUs so they execute in parallel. TP=2 means one model is split across 2 GPUs; they must synchronise on every transformer layer forward pass. On hardware with NVLink that synchronisation is fast. On this cluster it crosses PCIe, which is slow enough that TP=2 hurts latency compared to running a smaller model entirely on one GPU (TP=1). The registry contract hard-rejects `tensor_parallel_degree > 2` for this reason.
+
+### Serving & Observability
+
+**HPA (Horizontal Pod Autoscaler)**
+A built-in Kubernetes controller that watches a metric and adjusts the replica count of a Deployment. Out of the box it only reads CPU and memory — both useless for LLM inference, where a GPU can be at 5% CPU while fully saturated on requests. Wiring in a meaningful signal (queue depth, TTFT) requires a custom Prometheus Adapter. Ray Serve's autoscaler has this built in, which is one reason KubeRay is used instead of relying on HPA alone.
+
+**Queue Depth**
+The number of incoming requests waiting to be picked up by a model replica. When queue depth climbs, it means existing replicas are saturated and new ones should be started. This is the primary autoscaling signal for inference: more meaningful than CPU%, more actionable than memory%. vLLM exposes it as a native Prometheus metric; Ray Serve reads it to decide when to scale out.
+
+**TTFT (Time to First Token)**
+The elapsed time from when a request arrives until the first token streams back to the client. A user can tolerate a slow stream but not a long blank pause before anything appears, so TTFT is the key perceived-latency metric for LLM serving. It is LLM-specific — no generic Kubernetes or web-serving tool understands it natively. It is listed as a required Prometheus metric in the INF-01 acceptance criteria (criterion C5).
+
+**KV Cache (Key-Value Cache)**
+During inference the model computes attention over every prior token in the context window. The intermediate results — keys and values from each attention layer — are stored in VRAM so they are not recomputed on every new token. This cache is what PagedAttention (vLLM's core memory management feature) organises efficiently. When the KV cache fills, new requests must wait or be rejected. KV cache utilisation % is therefore a hard capacity signal and a required metric in C5 — more directly tied to accepting new requests than GPU compute utilisation.
