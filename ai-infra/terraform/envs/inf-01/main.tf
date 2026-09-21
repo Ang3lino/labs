@@ -27,10 +27,10 @@ module "ec2" {
   bootstrap_script = <<-EOF
     docker pull vllm/vllm-openai-cpu:latest
     docker run --rm \
-      -e HF_HUB_CACHE=/home/ubuntu/.cache/huggingface \
-      -v /home/ubuntu/.cache/huggingface:/home/ubuntu/.cache/huggingface \
+      --entrypoint python3 \
+      -v /home/ubuntu/.cache/huggingface:/root/.cache/huggingface \
       vllm/vllm-openai-cpu:latest \
-      python3 -c "from huggingface_hub import snapshot_download; snapshot_download('facebook/opt-125m')"
+      -c "from huggingface_hub import snapshot_download; snapshot_download('facebook/opt-125m')"
     chown -R ubuntu:ubuntu /home/ubuntu/.cache
   EOF
 

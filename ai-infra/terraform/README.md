@@ -63,7 +63,7 @@ docker run -d --name vllm-poc \
   -p 8000:8000 \
   -v ~/.cache/huggingface:/root/.cache/huggingface \
   vllm/vllm-openai-cpu:latest \
-  vllm serve facebook/opt-125m \
+  facebook/opt-125m \
     --port 8000 \
     --dtype float32 \
     --enforce-eager \
