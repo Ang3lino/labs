@@ -17,7 +17,7 @@ REQUIRED_FIELDS = [
 ]
 
 MAX_TP_DEGREE = 2
-REQUIRED_PROMOTION_STATE = "Production"
+VALID_PROMOTION_STATES = {"Production", "Promoted"}
 
 def validate_model_contract(model_data):
     model_name = model_data.get("model_name", "Unknown")
@@ -25,8 +25,11 @@ def validate_model_contract(model_data):
 
     # 1. Promotion state gates deployment
     promotion_state = model_data.get("promotion_state", "")
-    if promotion_state != REQUIRED_PROMOTION_STATE:
-        print(f"❌ REJECTED: Model '{model_name}' is not promoted. Current state: '{promotion_state}'. An unpromoted artifact cannot reach Production.")
+    if not promotion_state:
+        print(f"❌ REJECTED: Model '{model_name}' has no promotion_state. Cannot deploy an artifact without a known promotion state.")
+        return False
+    if promotion_state not in VALID_PROMOTION_STATES:
+        print(f"❌ REJECTED: Model '{model_name}' is not promoted. Current state: '{promotion_state}'. Must be one of {sorted(VALID_PROMOTION_STATES)}.")
         return False
 
     tags = model_data.get("tags", {})
@@ -40,6 +43,9 @@ def validate_model_contract(model_data):
     # 3. Reject tensor-parallel degree above 2
     try:
         tp_degree = int(tags.get("tensor_parallel_degree", 1))
+        if tp_degree < 1:
+            print(f"❌ REJECTED: 'tensor_parallel_degree' must be at least 1, got {tp_degree}.")
+            return False
         if tp_degree > MAX_TP_DEGREE:
             print(f"❌ REJECTED: Declared tensor-parallel degree is {tp_degree}. This exceeds the fleet ceiling of {MAX_TP_DEGREE} (due to L40S PCIe constraints).")
             return False
